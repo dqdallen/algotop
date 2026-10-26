@@ -2,6 +2,7 @@ import importlib.util
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 SPEC = importlib.util.find_spec('ingest')
@@ -21,6 +22,10 @@ class PipelineTests(unittest.TestCase):
             return replies.pop(0)
         p=ingest.Pipeline(Path(self.tmp.name), self.policy, transport=transport, today='2026-10-25', sleeper=lambda _:None)
         return p,calls
+    def test_transport_requires_managed_proxy(self):
+        with patch('urllib.request.getproxies',return_value={}):
+            with self.assertRaisesRegex(ValueError,'managed HTTPS proxy'):
+                ingest.transport('https://example.org/posts/a')
     def test_canonical_tracking_not_identity(self):
         self.assertEqual(ingest.canonical('HTTPS://EXAMPLE.org/posts/1?utm_source=x&id=2#q'), 'https://example.org/posts/1?id=2')
         self.assertNotEqual(ingest.canonical('https://example.org/p?a=1&b=2'),ingest.canonical('https://example.org/p?b=2&a=1'))

@@ -65,12 +65,11 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 def transport(url):
-    """No cookies/proxies/auth or redirects. DNS must resolve only to public addresses."""
-    host = urllib.parse.urlsplit(canonical(url)).hostname
-    addresses = socket.getaddrinfo(host,443,type=socket.SOCK_STREAM)
-    if not addresses or any(not ipaddress.ip_address(a[4][0]).is_global for a in addresses):
-        raise ValueError('Nonpublic DNS target')
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
+    """Managed HTTPS egress required; no cookies, target auth or redirects."""
+    url = canonical(url)
+    if not urllib.request.getproxies().get('https') or urllib.request.proxy_bypass(urllib.parse.urlsplit(url).hostname):
+        raise ValueError('A managed HTTPS proxy is required; direct network is disabled')
+    opener = urllib.request.build_opener(NoRedirect())
     req = urllib.request.Request(url,headers={'User-Agent':AGENT,'Accept':'text/html,text/plain','Accept-Encoding':'identity'})
     try:
         response = opener.open(req,timeout=15)
@@ -105,7 +104,8 @@ class Pipeline:
             decoded=urllib.parse.unquote(p.path)
             safe_path='..' not in decoded.split('/') and '\\' not in decoded and '%' not in decoded
             return (rule.get('terms_status')=='permitted' and bool(rule.get('terms_url')) and 0<=age<=30 and safe_path
-                and any(p.path.startswith(prefix) for prefix in rule.get('allowed_paths',[]) if prefix.startswith('/') and prefix.endswith('/')))
+                and (any(p.path.startswith(prefix) for prefix in rule.get('allowed_paths',[]) if prefix.startswith('/') and prefix.endswith('/'))
+                     or (not p.query and p.path in rule.get('allowed_exact_paths',[]))))
         except (KeyError,ValueError,TypeError):return False
     def request(self,url):
         for attempt in range(2):
