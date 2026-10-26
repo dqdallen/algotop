@@ -1,0 +1,17 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import * as core from '../core.js';
+const qs=[{id:'q1',title:'MMoE',tracks:['推荐'],tag:'多任务',records:[{event:'e1',source:'s1',company:'A',wording:'gate'},{event:'e1',source:'s2',company:'A',wording:'expert'},{event:'e2',source:'s3',company:'B',wording:'梯度'}]},{id:'q2',title:'DPO',tracks:['LLM'],tag:'对齐',records:[]}];
+test('tag narrows questions',()=>assert.equal(core.filterQuestions(qs,{tag:'对齐'}).length,1));
+test('company and evidence query must match same visible evidence',()=>assert.equal(core.filterQuestions(qs,{company:'A',query:'梯度'}).length,0));
+test('source posts differ from evidence groups',()=>{assert.equal(typeof core.evidenceStats,'function');assert.deepEqual(core.evidenceStats(qs[0].records,'A'),{evidence:1,posts:2});});
+test('missing event IDs do not collapse unrelated source posts',()=>assert.equal(core.countSources([{source:'s1'},{source:'s2'}]),2));
+test('progress validation rejects malformed entries',()=>{assert.equal(typeof core.validateProgress,'function');assert.throws(()=>core.validateProgress({q1:{status:'evil'}}));assert.throws(()=>core.validateProgress({q1:{note:42}}));});
+test('progress imports legacy and versioned shape safely',()=>{assert.equal(typeof core.validateProgress,'function');assert.deepEqual(core.validateProgress({version:1,progress:{q1:{saved:true,status:'done',note:'x'}}}),{q1:{saved:true,status:'done',note:'x'}});});
+test('study queue excludes mastered questions',()=>{assert.equal(typeof core.studyQueue,'function');assert.deepEqual(core.studyQueue(qs,{q1:{status:'done'}}).map(q=>q.id),['q2']);});
+test('source year filters use source dates without inventing unknown dates',()=>{assert.equal(core.filterQuestions(qs,{year:'2024',sources:[{id:'s1',date:'2023-01-01'},{id:'s3',date:'2024-03-01'}]}).length,1);assert.equal(core.filterQuestions(qs,{company:'A',year:'2024',sources:[{id:'s3',date:'2024-03-01'}]}).length,0)});
+test('visible records follow search evidence rather than inflating counts',()=>{assert.equal(typeof core.matchingRecords,'function');assert.deepEqual(core.matchingRecords(qs[0],{query:'梯度'}).map(r=>r.source),['s3']);assert.equal(core.matchingRecords(qs[0],{query:'MMoE'}).length,3)});
+test('empty inline answer cannot shadow completed overlay',()=>{assert.equal(typeof core.resolveAnswer,'function');assert.deepEqual(core.resolveAnswer({}, {summary:'reference'}),{summary:'reference'});assert.equal(core.resolveAnswer({},undefined),null)});
+test('question aliases resolve old links and reject cycles safely',()=>{assert.equal(typeof core.resolveQuestionId,'function');assert.equal(core.resolveQuestionId('q078',{q078:'q073'}),'q073');assert.equal(core.resolveQuestionId('a',{a:'b',b:'a'}),'a')});
+test('alias progress migration preserves both notes and conservative review state',()=>{assert.equal(typeof core.migrateProgress,'function');assert.deepEqual(core.migrateProgress({q078:{saved:true,status:'review',note:'old'},q073:{status:'done',note:'new'},unknown:{note:'keep'}},{q078:'q073'}),{q073:{saved:true,status:'review',note:'new\n\n[由 q078 合并]\nold'},unknown:{note:'keep'}})});
+test('explicit interview month is a known year without inventing a date',()=>{const sources=[{id:'s1',date:null,interviewMonth:'2026-03'},{id:'s2',date:null,dateDisplay:'03-09'}];assert.equal(core.matchingRecords(qs[0],{year:'2026',sources}).length,1);assert.equal(core.matchingRecords(qs[0],{year:'unknown',sources}).length,2)});

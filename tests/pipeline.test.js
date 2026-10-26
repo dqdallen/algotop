@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtempSync,writeFileSync,readFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {spawnSync} from 'node:child_process';
+const script=resolve('scripts/data-pipeline.js');
+const fixture=()=>({updated:'2026-10-25',sources:[{id:'s1',company:'Example',title:'Interview',url:'https://example.com/post/1',date:null,kind:'个人自述'}],questions:[{id:'q1',title:'Attention',tracks:['LLM'],tag:'模型',mergeReason:'独立题',records:[{event:'e1',source:'s1',company:'Example',wording:'Explain attention'}],answerStatus:'待专业审核'}]});
+function run(db,args=[],extra={}){const dir=mkdtempSync(join(tmpdir(),'algotop-qa-'));try{writeFileSync(join(dir,'data.json'),JSON.stringify(db));for(const [name,value]of Object.entries(extra))writeFileSync(join(dir,name),JSON.stringify(value));const out=spawnSync(process.execPath,[script,...args],{cwd:dir,encoding:'utf8'});return {...out,data:JSON.parse(readFileSync(join(dir,'data.json'),'utf8'))};}finally{rmSync(dir,{recursive:true,force:true});}}
+test('valid dataset yields an auditable coverage report without writing',()=>{const db=fixture(),r=run(db);assert.equal(r.status,0,r.stderr);const report=JSON.parse(r.stdout);assert.equal(report.counts.questions,1);assert.equal(report.coverage.answered,0);assert.equal(report.coverage.missing[0],'q1');assert.deepEqual(r.data,db);});
+for(const [name,mutate] of Object.entries({
+ 'invalid scheme':d=>d.sources[0].url='javascript:alert(1)',
+ 'duplicate source ids':d=>d.sources.push({...d.sources[0]}),
+ 'canonical URL duplicate':d=>d.sources.push({...d.sources[0],id:'s2',url:'https://example.com/post/1?utm_source=x#section'}),
+ 'dangling source':d=>d.questions[0].records[0].source='absent',
+ 'future date':d=>d.sources[0].date='2027-01-01',
+ 'impossible date':d=>d.sources[0].date='2026-02-30',
+ 'incomplete source':d=>delete d.sources[0].title,
+ 'duplicate question ids':d=>d.questions.push({...d.questions[0]}),
+ 'record company mismatch':d=>d.questions[0].records[0].company='Another',
+ 'invented frequency':d=>d.questions[0].frequency=999,
+ 'invalid tracks':d=>d.questions[0].tracks=['Unknown']
+}))test('rejects '+name,()=>{const d=fixture();mutate(d);const r=run(d);assert.equal(r.status,1,r.stdout+r.stderr);assert.ok(JSON.parse(r.stdout).errors.length);assert.deepEqual(r.data,d);});
+test('answers coverage excludes unknown question ids',()=>{const r=run(fixture(),['--answers','answers.json'],{'answers.json':{q1:{summary:'Explanation'},q999:{summary:'Orphan'}}});assert.equal(r.status,1);const p=JSON.parse(r.stdout);assert.equal(p.coverage.answered,1);assert.deepEqual(p.coverage.orphaned,['q999']);});
+test('import is dry-run by default and writes only with explicit flag',()=>{const db=fixture(),batch={sources:[{...db.sources[0],id:'s2',url:'https://example.com/post/2'}],questions:[{...db.questions[0],id:'q2',records:[{...db.questions[0].records[0],source:'s2',event:'e2'}]}]};const dry=run(db,['--import','batch.json'],{'batch.json':batch});assert.equal(dry.status,0,dry.stderr);assert.equal(JSON.parse(dry.stdout).counts.questions,2);assert.deepEqual(dry.data,db);const written=run(db,['--import','batch.json','--write'],{'batch.json':batch});assert.equal(written.status,0,written.stderr);assert.equal(written.data.questions.length,2);});
+test('invalid import never writes and cannot overwrite existing IDs',()=>{const db=fixture(),r=run(db,['--import','batch.json','--write'],{'batch.json':{sources:[],questions:[{...db.questions[0],title:'Overwrite'}]}});assert.equal(r.status,1);assert.deepEqual(r.data,db);});
+test('write without import is refused',()=>{const r=run(fixture(),['--write']);assert.equal(r.status,1);});
+test('build copies only public runtime allowlist including answer overlays',()=>{const dir=mkdtempSync(join(tmpdir(),'algotop-build-'));try{for(const name of ['index.html','style.css','app.js','core.js','data.json','taxonomy.json','answers.json','answers-extra.json','private-notes.json'])writeFileSync(join(dir,name),'{}');const r=spawnSync(process.execPath,[resolve('scripts/build.js')],{cwd:dir,encoding:'utf8'});assert.equal(r.status,0,r.stderr);assert.equal(readFileSync(join(dir,'_site','answers-extra.json'),'utf8'),'{}');assert.throws(()=>readFileSync(join(dir,'_site','private-notes.json')));}finally{rmSync(dir,{recursive:true,force:true});}});
+test('missing runtime asset makes build fail',()=>{const dir=mkdtempSync(join(tmpdir(),'algotop-build-'));try{const r=spawnSync(process.execPath,[resolve('scripts/build.js')],{cwd:dir,encoding:'utf8'});assert.equal(r.status,1);}finally{rmSync(dir,{recursive:true,force:true});}});
+test('malformed questions are reported rather than crashing',()=>{const d=fixture();d.questions=[null];const r=run(d);assert.equal(r.status,1);assert.ok(JSON.parse(r.stdout).errors.some(x=>x.includes('expected object')));});
+test('duplicate answer overlays cannot silently overwrite',()=>{const r=run(fixture(),['--answers','one.json','--answers','two.json'],{'one.json':{q1:{summary:'One'}},'two.json':{q1:{summary:'Two'}}});assert.equal(r.status,1);assert.match(r.stdout,/Duplicate answer overlay/);});
+test('explicit multi-company source_document preserves one event without company inflation',()=>{const d=fixture();d.sources[0].company='合集';d.sources[0].companies=['Example','Another'];d.questions[0].records[0].eventUnit='source_document';d.questions.push({...d.questions[0],id:'q2',records:[{...d.questions[0].records[0],company:'Another',wording:'Other question'}]});const r=run(d);assert.equal(r.status,0,r.stdout);assert.equal(JSON.parse(r.stdout).counts.distinctEvents,1);});
+test('shared event across companies without declared source-document unit is rejected',()=>{const d=fixture();d.sources[0].companies=['Example','Another'];d.questions.push({...d.questions[0],id:'q2',records:[{...d.questions[0].records[0],company:'Another'}]});const r=run(d);assert.equal(r.status,1);assert.match(r.stdout,/event identity/);});
+
+test('v2 rejects missing or invalid provenance role taxonomy',()=>{const d=fixture();d.schemaVersion=2;d.sources[0].jobDirections=[{id:'lora',certainty:'explicit',evidence:'LoRA'}];const r=run(d);assert.equal(r.status,1);assert.match(r.stdout,/jobDirections/)});
+test('expanded study topics do not require a matching job role',()=>{const d=fixture();d.questions[0].tracks=['CV','语音','机器人','风控','运筹优化','时序预测','图学习'];const r=run(d);assert.equal(r.status,0,r.stdout)});
+test('v2 study topic labels may evolve without becoming job direction IDs',()=>{const d=JSON.parse(readFileSync(resolve('data.json'),'utf8'));d.questions[0].tracks=['MFCC','BEV'];d.questions[0].studyTopics=['MFCC','BEV'];const r=run(d);assert.ok(!JSON.parse(r.stdout).errors.some(e=>e.includes('tracks')),r.stdout)});
+test('v2 audit byTrack reports the actual normalized study-topic union and counts',()=>{const d=JSON.parse(readFileSync(resolve('data.json'),'utf8'));d.questions[0].studyTopics=['计算机视觉','语音音频','审计测试主题'];d.questions[0].tracks=['旧兼容标签'];const expected={};for(const q of d.questions)for(const t of new Set(q.studyTopics||q.tracks))expected[t]=(expected[t]||0)+1;const r=run(d);const actual=JSON.parse(r.stdout).counts.byTrack;assert.deepEqual(actual,expected);assert.equal(Object.values(actual).reduce((a,b)=>a+b,0),d.questions.reduce((n,q)=>n+new Set(q.studyTopics||q.tracks).size,0))});
