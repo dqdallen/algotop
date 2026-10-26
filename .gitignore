@@ -1,0 +1,18 @@
+# Generated files
+_site/
+__pycache__/
+*.py[cod]
+# Internal research and QA
+research-backlog.json
+docs/QA_PREVIEW.md
+tools/collection/TOOLING.md
+# Credentials, imports, backups and user learning records
+.env
+.env.*
+*.pem
+*.key
+*.bak
+*.tmp-*
+candidates.json
+private-notes*
+algotop-progress-*.json

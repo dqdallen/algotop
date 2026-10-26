@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 2,
+  "jobDirections": [
+    {
+      "id": "recommendation",
+      "label": "推荐算法",
+      "group": "信息分发与商业",
+      "aliases": [
+        "推荐系统",
+        "推荐算法",
+        "推荐岗"
+      ]
+    },
+    {
+      "id": "search",
+      "label": "搜索算法",
+      "group": "信息分发与商业",
+      "aliases": [
+        "搜索算法",
+        "搜索岗",
+        "信息检索"
+      ]
+    },
+    {
+      "id": "advertising",
+      "label": "广告算法",
+      "group": "信息分发与商业",
+      "aliases": [
+        "广告算法",
+        "广告岗",
+        "计算广告"
+      ]
+    },
+    {
+      "id": "marketing",
+      "label": "营销与增长算法",
+      "group": "信息分发与商业",
+      "aliases": [
+        "营销算法",
+        "增长算法",
+        "策略算法"
+      ],
+      "subtopics": [
+        "营销增长",
+        "因果推断与Uplift"
+      ]
+    },
+    {
+      "id": "nlp",
+      "label": "自然语言处理",
+      "group": "语言与生成智能",
+      "aliases": [
+        "NLP",
+        "自然语言处理"
+      ]
+    },
+    {
+      "id": "llm",
+      "label": "大语言模型",
+      "group": "语言与生成智能",
+      "aliases": [
+        "LLM",
+        "大模型算法",
+        "大模型岗",
+        "大模型实习"
+      ]
+    },
+    {
+      "id": "multimodal",
+      "label": "多模态与生成",
+      "group": "语言与生成智能",
+      "aliases": [
+        "VLM",
+        "多模态"
+      ]
+    },
+    {
+      "id": "computer-vision",
+      "label": "计算机视觉",
+      "group": "感知与物理智能",
+      "aliases": [
+        "CV",
+        "计算机视觉",
+        "视觉算法",
+        "图像算法",
+        "图像处理"
+      ],
+      "subtopics": [
+        "检测与分割",
+        "3D视觉",
+        "图像生成与增强"
+      ]
+    },
+    {
+      "id": "speech-audio",
+      "label": "语音与音频",
+      "group": "感知与物理智能",
+      "aliases": [
+        "ASR",
+        "TTS",
+        "语音算法",
+        "音频算法"
+      ],
+      "subtopics": [
+        "ASR",
+        "TTS",
+        "音频理解"
+      ]
+    },
+    {
+      "id": "robotics",
+      "label": "机器人与具身智能",
+      "group": "感知与物理智能",
+      "aliases": [
+        "机器人",
+        "具身智能"
+      ]
+    },
+    {
+      "id": "autonomous-driving",
+      "label": "自动驾驶",
+      "group": "感知与物理智能",
+      "aliases": [
+        "自动驾驶",
+        "无人驾驶"
+      ],
+      "subtopics": [
+        "感知",
+        "轨迹预测",
+        "规划与控制"
+      ]
+    },
+    {
+      "id": "risk-fraud",
+      "label": "风控与反欺诈",
+      "group": "决策与行业智能",
+      "aliases": [
+        "风控算法",
+        "反欺诈"
+      ]
+    },
+    {
+      "id": "operations-research",
+      "label": "运筹优化与调度",
+      "group": "决策与行业智能",
+      "aliases": [
+        "运筹优化",
+        "运筹算法",
+        "调度算法"
+      ],
+      "subtopics": [
+        "调度",
+        "路径规划",
+        "资源分配"
+      ]
+    },
+    {
+      "id": "time-series",
+      "label": "时序预测",
+      "group": "决策与行业智能",
+      "aliases": [
+        "时序预测",
+        "时间序列预测",
+        "预测算法"
+      ],
+      "subtopics": [
+        "预测",
+        "异常检测"
+      ]
+    },
+    {
+      "id": "graph-mining",
+      "label": "图挖掘与知识图谱",
+      "group": "通用机器学习与工程",
+      "aliases": [
+        "图挖掘",
+        "知识图谱算法"
+      ]
+    },
+    {
+      "id": "machine-learning",
+      "label": "机器学习 / 数据挖掘",
+      "group": "通用机器学习与工程",
+      "aliases": [
+        "机器学习",
+        "数据挖掘"
+      ]
+    },
+    {
+      "id": "data-science",
+      "label": "数据科学",
+      "group": "通用机器学习与工程",
+      "aliases": [
+        "数据科学",
+        "Data Scientist"
+      ],
+      "subtopics": [
+        "统计建模",
+        "实验设计",
+        "因果推断"
+      ]
+    },
+    {
+      "id": "other",
+      "label": "其他已明确算法方向",
+      "group": "其他与待确认",
+      "aliases": [
+        "其他算法方向"
+      ]
+    },
+    {
+      "id": "unknown",
+      "label": "方向未明确",
+      "group": "其他与待确认",
+      "aliases": [
+        "未明确"
+      ]
+    }
+  ],
+  "rules": [
+    "岗位方向按来源岗位叙述标注，可多选；学习主题不是岗位方向。",
+    "LoRA、Transformer、GNN、强化学习等技术本身不能证明岗位方向。",
+    "未明确方向使用 unknown，不从题目知识标签推断。",
+    "other 表示来源明确了算法方向但尚未归类；unknown 表示来源未明确。",
+    "subtopics 仅辅助归类，不据技术词自动断言招聘方向。量化研究等相邻岗位需明确算法职责后单独审定。"
+  ],
+  "adjacentExcluded": [
+    {
+      "id": "ai-infra",
+      "label": "AI 系统与推理优化",
+      "group": "通用机器学习与工程",
+      "aliases": [
+        "AI Infra",
+        "推理优化",
+        "模型部署"
+      ]
+    }
+  ]
+}

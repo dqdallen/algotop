@@ -1,0 +1,1644 @@
+{
+  "q021": {
+    "summary": "先比较训练与验证误差，再判断容量、数据和优化瓶颈；不能看到低分就直接加正则。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "训练好、验证差通常提示高方差：树模型限制深度/叶子，神经网络用权重衰减、早停和数据增强。两者都差则检查标签、特征、训练是否收敛，再增容量或减正则。"
+      },
+      {
+        "title": "验证与取舍",
+        "content": "画随样本量、训练轮数变化的曲线；按时间或用户隔离验证。更多数据主要帮助高方差问题，分布漂移不等同于过拟合。"
+      }
+    ],
+    "pitfalls": [
+      "将训练未收敛误判成欠拟合，盲目扩大模型。"
+    ],
+    "followUps": [
+      "怎样用学习曲线区分数据不足与模型容量不足？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：学习曲线",
+        "url": "https://scikit-learn.org/stable/modules/learning_curve.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q022": {
+    "summary": "交叉验证用多次训练/验证估计泛化表现，并辅助选超参数，不是把测试集轮流拿来调参。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "K 折每次留一折验证，汇总均值与波动；分类可分层，同用户样本应分组，预测未来应采用时间顺序切分。"
+      },
+      {
+        "title": "实施细节",
+        "content": "标准化、特征选择必须仅在每折训练部分拟合，可放入 Pipeline。选参后再用未触碰测试集评估；比较大量方案时可采用嵌套交叉验证。"
+      }
+    ],
+    "pitfalls": [
+      "先用全量数据做特征选择，再交叉验证，会泄漏。"
+    ],
+    "followUps": [
+      "为什么时序任务不宜直接随机 K 折？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：交叉验证",
+        "url": "https://scikit-learn.org/stable/modules/cross_validation.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q023": {
+    "summary": "L1 倾向稀疏解，L2 倾向连续收缩；两者都通过牺牲部分训练拟合降低方差。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "目标分别加 λΣabs(w) 与 λΣw²；L1 在零点不可微，用次梯度或近端方法，软阈值可产生零系数；L2 梯度为 2λw。"
+      },
+      {
+        "title": "选择与边界",
+        "content": "高维筛特征可尝试 L1，强相关特征下选择可能不稳定；L2 往往分摊权重。先统一特征尺度，用验证集选择 λ；Elastic Net 混合两者。"
+      }
+    ],
+    "pitfalls": [
+      "把 L2 正则与 AdamW 的解耦权重衰减在所有优化器下视作等价。"
+    ],
+    "followUps": [
+      "相关特征很多时为什么可以考虑 Elastic Net？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：线性模型",
+        "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q024": {
+    "summary": "先定义处理、结果和目标效应，再说明识别假设，最后才选估计器。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "随机实验是优先路线；观察数据可做回归调整、倾向得分匹配/IPW 或双重稳健估计。自然实验场景考虑双重差分、断点回归或工具变量。"
+      },
+      {
+        "title": "关键假设",
+        "content": "调整法需一致性、可交换性与重叠，并关注干扰；DID 依赖平行趋势，断点需阈值附近可比且无精确操纵。IV 需相关性、外生性及排除限制；识别 LATE 通常还需单调性，不能默认是总体 ATE。做平衡性、安慰剂和敏感性检查。"
+      }
+    ],
+    "pitfalls": [
+      "把相关性提升或预测准确率当作干预效果。"
+    ],
+    "followUps": [
+      "若存在未观测混杂，你的识别依据还成立吗？"
+    ],
+    "references": [
+      {
+        "title": "DoWhy：因果效应估计",
+        "url": "https://www.pywhy.org/dowhy/main/user_guide/causal_tasks/estimating_causal_effects/index.html"
+      },
+      {
+        "title": "DoWhy：工具变量假设示例",
+        "url": "https://www.pywhy.org/dowhy/main/example_notebooks/dowhy-simple-iv-example.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q025": {
+    "summary": "先把偏好定义成可观测行为和条件概率，区分人群差异与曝光策略造成的差异。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "按新老、活跃度、场景等预先定义分群，比较类目点击、有效观看、复访等；同时看人数、曝光基数与置信区间，再用用户/物品表示分析兴趣。"
+      },
+      {
+        "title": "分析与验证",
+        "content": "控制时间、入口及曝光结构；小群体做收缩或合并。可通过随机曝光验证差异，避免将仅对某群展示的内容误判为其天生偏好。"
+      }
+    ],
+    "pitfalls": [
+      "仅看点击次数，不看曝光和人群规模。"
+    ],
+    "followUps": [
+      "怎样验证分群差异不是推荐系统自身造成的？"
+    ],
+    "references": [
+      {
+        "title": "DoWhy：因果效应估计",
+        "url": "https://www.pywhy.org/dowhy/main/user_guide/causal_tasks/estimating_causal_effects/index.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q026": {
+    "summary": "图表示质量应由目标任务和泛化条件判断，二维可视化只能作诊断。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "节点分类看 F1/AUC，链接预测看 AP、MRR 或 Hits@K，图分类看任务指标；冻结表示接简单探针，和原始特征、无图及随机图基线比较。"
+      },
+      {
+        "title": "划分与消融",
+        "content": "归纳任务留出新节点/新图，时序任务只用历史边。评估不同度数、冷启动节点，消融特征、邻居与层数，检查过平滑和推理成本。"
+      }
+    ],
+    "pitfalls": [
+      "先在包含测试未来边的图上学表示，再声称泛化。"
+    ],
+    "followUps": [
+      "链接预测的负样本如何采，指标会受什么影响？"
+    ],
+    "references": [
+      {
+        "title": "GraphSAGE 原论文",
+        "url": "https://arxiv.org/abs/1706.02216"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q027": {
+    "summary": "把带约束的最大间隔问题写成拉格朗日函数，用 KKT 连接原始变量、对偶变量和支持向量。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "软间隔 SVM 最小化 ½‖w‖²+CΣξ，约束 yᵢ(w·xᵢ+b)≥1−ξᵢ、ξᵢ≥0；消去原始变量得到对偶，满足 0≤αᵢ≤C、Σαᵢyᵢ=0。"
+      },
+      {
+        "title": "KKT 的作用",
+        "content": "需原始/对偶可行、驻点和互补松弛。0<αᵢ<C 的点位于间隔边界，可用于求 b；αᵢ=0 通常不是支持向量。核函数替换内积。"
+      }
+    ],
+    "pitfalls": [
+      "把 αᵢ=C 一律解释为误分类；它也可能在间隔内但分类正确。"
+    ],
+    "followUps": [
+      "为什么核矩阵通常要求半正定？"
+    ],
+    "references": [
+      {
+        "title": "Boyd：Convex Optimization",
+        "url": "https://web.stanford.edu/~boyd/cvxbook/"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q028": {
+    "summary": "先确认实验与服务无误，再拆开排序、校准、分布和业务目标不一致四类原因。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "核查 A/B 分流、样本比例、埋点和显著性；比对训练/在线特征、模型版本、缺失值和延迟。随后按用户与流量层检查 AUC、校准及目标指标。"
+      },
+      {
+        "title": "定位办法",
+        "content": "全局 AUC 可能改善跨人群排序却损害用户内排序；负采样、候选集和时间漂移也会改变关系。若线上用概率乘价值，概率校准尤为重要；回放并做小流量验证。"
+      }
+    ],
+    "pitfalls": [
+      "离线 AUC 上升就断言线上必然提升。"
+    ],
+    "followUps": [
+      "AUC 不变但校准变差，为何广告收入可能下降？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：概率校准",
+        "url": "https://scikit-learn.org/stable/modules/calibration.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q029": {
+    "summary": "GCN 以归一化邻接传播为代表；GraphSAGE 以采样邻居、学习共享聚合函数来支持归纳推断。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "GCN 常写 H′=σ(D̂⁻½ÂD̂⁻½HW)，Â 加自环。GraphSAGE 对采样邻居做 mean/pool 等聚合，再与自身表示结合，控制大图训练成本。"
+      },
+      {
+        "title": "取舍与边界",
+        "content": "采样降低开销但引入方差，多层邻居仍会膨胀；两者都可能过平滑。原始 GCN 实验多为传导设置，但有节点特征的 GCN 也可用于新图，不应说它数学上绝不能归纳。"
+      }
+    ],
+    "pitfalls": [
+      "只用“一个传导、一个归纳”概括全部差异。"
+    ],
+    "followUps": [
+      "采样 fanout 增大对效果、显存和延迟有什么影响？"
+    ],
+    "references": [
+      {
+        "title": "GCN 原论文",
+        "url": "https://arxiv.org/abs/1609.02907"
+      },
+      {
+        "title": "GraphSAGE 原论文",
+        "url": "https://arxiv.org/abs/1706.02216"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q030": {
+    "summary": "LoRA 冻结原权重，用低秩增量学习任务变化；适配层和秩应由预算及验证结果选择。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "对 W∈Rᵈᵒᵘᵗ×ᵈⁱⁿ，令 ΔW=(α/r)BA，训练参数为 r(din+dout)。常令一个矩阵零初始化，使初始增量为零。"
+      },
+      {
+        "title": "工程选择",
+        "content": "从注意力投影起步，也可覆盖 MLP；比较目标层、rank、α、dropout、学习率及训练轮数。看任务质量、遗忘和显存；可合并进同精度权重，但量化/多适配器场景需另评估。"
+      }
+    ],
+    "pitfalls": [
+      "认为 rank 越大一定越好，或“可训练参数少”等于激活显存也少。"
+    ],
+    "followUps": [
+      "为什么 LoRA 两个因子不能同时零初始化？"
+    ],
+    "references": [
+      {
+        "title": "LoRA 原论文",
+        "url": "https://arxiv.org/abs/2106.09685"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q031": {
+    "summary": "切块的目标是让可检索片段语义完整，同时让证据能在上下文预算内被使用。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "先解析标题、段落、表格及页码，再按结构切块，以 token 而非字符控制长度；适度重叠处理跨界信息。可采用小块检索、大块回填的父子结构。"
+      },
+      {
+        "title": "验证设计",
+        "content": "用真实问题比较不同大小/重叠的 Recall@K、引用覆盖率与答案正确率，并记录 token 成本。表格保留表头，版本和权限随块存储；不存在通用最优块大小。"
+      }
+    ],
+    "pitfalls": [
+      "把扫描 PDF 直接按固定字符切分，丢失版面和证据位置。"
+    ],
+    "followUps": [
+      "答案跨两段时，如何区分切块失败与召回失败？"
+    ],
+    "references": [
+      {
+        "title": "RAG 原论文",
+        "url": "https://arxiv.org/abs/2005.11401"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q032": {
+    "summary": "先拆分数据、表示和索引误差，再决定是否微调 Embedding，而不是只换更大模型。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "建立带相关性标签的查询集，检查文本清洗、领域词、查询/文档模板及相似度一致性；比较 BM25、稠密召回与混合召回。"
+      },
+      {
+        "title": "改进与评估",
+        "content": "用领域正例和难负例做对比学习，防范假负例；对 ANN 与精确搜索比较召回损失，再考虑 reranker。按短查询、专有词、跨语言等分桶看 Recall@K 和延迟。"
+      }
+    ],
+    "pitfalls": [
+      "在候选全集中已漏掉正确证据，却只调生成提示。"
+    ],
+    "followUps": [
+      "如何判断瓶颈来自 Embedding 还是 ANN 参数？"
+    ],
+    "references": [
+      {
+        "title": "DPR 原论文",
+        "url": "https://arxiv.org/abs/2004.04906"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q033": {
+    "summary": "重复输出可能来自训练数据、标签掩码、结束符或解码设置，先用对照实验定位。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "统计重复模板/近重复样本；检查 EOS 是否真实参与监督、标签移位是否正确、padding 是否被屏蔽，以及训练与推理 chat template 是否一致。"
+      },
+      {
+        "title": "排查次序",
+        "content": "固定同一提示比较基座、各 checkpoint 与不同解码参数；检查是否过多轮训练或学习率过大。用重复 n-gram 比率、正常终止率和任务质量联合评价，不能只靠 repetition penalty 掩盖训练问题。"
+      }
+    ],
+    "pitfalls": [
+      "看到复读就只增加惩罚，破坏必要的术语或代码重复。"
+    ],
+    "followUps": [
+      "如何验证是 EOS 训练错误，而不是生成长度设置错误？"
+    ],
+    "references": [
+      {
+        "title": "Hugging Face：SFT Trainer",
+        "url": "https://huggingface.co/docs/trl/sft_trainer"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q034": {
+    "summary": "LoRA 可以学习领域模式与部分知识，但并非可靠、可审计或易更新的知识库。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "稳定的术语、表达和任务规则适合用领域样本适配；频繁变化的事实、需要逐条出处的回答优先考虑检索。是否选 LoRA 应由任务和全参基线对照决定。"
+      },
+      {
+        "title": "验证边界",
+        "content": "区分“记住训练问答”与“能回答未见改写/组合问题”；按实体或时间留出测试，检验事实准确性、遗忘与拒答。可结合 RAG 提供证据，微调负责使用证据。"
+      }
+    ],
+    "pitfalls": [
+      "把训练集准确率当成知识已完整写入参数的证明。"
+    ],
+    "followUps": [
+      "为什么同一事实换问法后仍需单独评估？"
+    ],
+    "references": [
+      {
+        "title": "LoRA 原论文",
+        "url": "https://arxiv.org/abs/2106.09685"
+      },
+      {
+        "title": "RAG 原论文",
+        "url": "https://arxiv.org/abs/2005.11401"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q035": {
+    "summary": "降低幻觉要同时处理证据供给、回答约束与独立验证，不能承诺完全消除。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "可检索问题先提供可靠、最新且有权限的证据；要求回答标明依据、区分未知，缺证据时拒答或追问。计算和数据库事实交给受控工具。"
+      },
+      {
+        "title": "评估与防护",
+        "content": "将检索召回、证据忠实性、事实正确性分开测；建立无答案和冲突证据样本，人工抽查引用是否真的支持结论。检索文档属于不可信数据，不能让其中指令越权。"
+      }
+    ],
+    "pitfalls": [
+      "有引用链接就认定内容真实，或温度调零就保证不幻觉。"
+    ],
+    "followUps": [
+      "怎样评估拒答增多带来的准确率与覆盖率取舍？"
+    ],
+    "references": [
+      {
+        "title": "RAG 原论文",
+        "url": "https://arxiv.org/abs/2005.11401"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q036": {
+    "summary": "普通 SGD 的单步更新可等价，但自适应优化、裁剪及正则使两种操作通常不等价。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "若仅优化同一数据损失、无其他处理，L→0.1L 会令梯度乘 0.1，与 SGD 学习率乘 0.1 等效。Adam 的一阶矩约乘 0.1、二阶矩约乘 0.01，归一化会大体抵消。"
+      },
+      {
+        "title": "适用条件",
+        "content": "ε、已有动量状态、梯度裁剪、混合精度和权重衰减均可能破坏等价；只缩放数据项也改变它与正则项的相对权重。应说明优化器与具体目标。"
+      }
+    ],
+    "pitfalls": [
+      "忽略 Adam 的归一化，认为所有优化器更新都缩小十倍。"
+    ],
+    "followUps": [
+      "使用 AdamW 时只缩放 loss，会怎样改变衰减的相对作用？"
+    ],
+    "references": [
+      {
+        "title": "Adam 原论文",
+        "url": "https://arxiv.org/abs/1412.6980"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q037": {
+    "summary": "多路召回首先要解决覆盖、去重和配额，再考虑分数融合；各路原始分数通常不可直接相加。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "保留 item 的召回来源及各路分数，去重后可按固定/动态配额合并；无可比分数时可用倒数排名融合，再交统一粗排或精排。"
+      },
+      {
+        "title": "评估取舍",
+        "content": "看各路独占有效召回、覆盖率、长尾/新物品占比和总体 Recall@K，不只看单路命中。融合参数需在固定候选预算与延迟下验证，线上监测业务收益。"
+      }
+    ],
+    "pitfalls": [
+      "某一路覆盖与其他路高度重复，却因单路指标高占满候选。"
+    ],
+    "followUps": [
+      "怎样测量新增召回通道的边际价值？"
+    ],
+    "references": [
+      {
+        "title": "DPR 原论文",
+        "url": "https://arxiv.org/abs/2004.04906"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q038": {
+    "summary": "图片推荐要融合视觉内容、文本语义、用户行为和场景信息，不能只做图片相似度。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "视觉表示可描述主体、风格和布局，文本来自标题/OCR/标签；用户侧使用历史点击、收藏、负反馈与时序上下文，物品侧加入质量、新鲜度和可用性。"
+      },
+      {
+        "title": "训练与验证",
+        "content": "图文预训练向量可帮助冷启动，但仍需用真实业务反馈训练排序。按冷/热物品和人群分桶验证 CTR、收藏及多样性，去重并防止近重复图跨数据集泄漏。"
+      }
+    ],
+    "pitfalls": [
+      "把 CLIP 相似度直接解释为用户点击概率。"
+    ],
+    "followUps": [
+      "无行为的新图怎样召回，如何验证冷启动收益？"
+    ],
+    "references": [
+      {
+        "title": "CLIP 原论文",
+        "url": "https://arxiv.org/abs/2103.00020"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q039": {
+    "summary": "查询增强应保留原意，再补充上下文和领域表达，并用检索效果而非文字流畅度判断。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "可做拼写纠错、实体归一化、同义扩展、历史对话消歧或多查询改写；用双塔表示召回，再以交叉编码器联合看查询与候选。"
+      },
+      {
+        "title": "质量控制",
+        "content": "为专有名词保留字面检索通道，限制无证据扩写；比较原查询与改写查询的召回贡献，按歧义、长尾、否定表达分桶检查，必要时向用户澄清。"
+      }
+    ],
+    "pitfalls": [
+      "改写看起来更完整，却偷偷加入用户没有表达的条件。"
+    ],
+    "followUps": [
+      "短查询“苹果”应怎样结合上下文而不强行猜测？"
+    ],
+    "references": [
+      {
+        "title": "DPR 原论文",
+        "url": "https://arxiv.org/abs/2004.04906"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q040": {
+    "summary": "矩阵分解用低维用户与物品向量近似交互关系，学习潜在兴趣，而不是简单填补所有空值。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "显式评分可用 r̂ui=μ+bu+bi+puᵀqi，最小化已观测项平方误差加正则。隐式行为可用置信度加权目标或基于正负对的 BPR。"
+      },
+      {
+        "title": "取舍与验证",
+        "content": "未交互不等于不喜欢，要说明负采样和曝光偏差。向量可用于近邻召回，但纯 ID 模型冷启动弱；可加入内容特征。按时间留出，用 Recall/NDCG 而不只训练损失评估。"
+      }
+    ],
+    "pitfalls": [
+      "把所有未观测评分设成零并当成真实负例。"
+    ],
+    "followUps": [
+      "有新用户或新物品时，纯矩阵分解为什么困难？"
+    ],
+    "references": [
+      {
+        "title": "BPR 原论文",
+        "url": "https://arxiv.org/abs/1205.2618"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q041": {
+    "summary": "LSTM 用门控制记忆的保留、写入和读出，以加性记忆路径缓解长期梯度问题。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "遗忘门 ft 决定保留多少旧记忆，输入门 it 控制候选 g 写入：ct=ft⊙ct−1+it⊙gt；输出门 ot 控制 ht=ot⊙tanh(ct)。门通常用 sigmoid，候选用 tanh。"
+      },
+      {
+        "title": "关键细节",
+        "content": "各门由当前输入和上一隐状态计算；记忆状态 c 与隐状态 h 不同。它缓解但不保证消除梯度消失，仍需裁剪、合适初始化和序列长度策略。"
+      }
+    ],
+    "pitfalls": [
+      "把遗忘门理解成直接删除整个历史，而非逐维软控制。"
+    ],
+    "followUps": [
+      "为什么 c 的加法路径比普通 RNN 更有利于长程梯度？"
+    ],
+    "references": [
+      {
+        "title": "PyTorch：LSTM",
+        "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.LSTM.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q042": {
+    "summary": "分别计算线性投影和注意力矩阵，才能完整解释长度、宽度对开销的影响。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "长度 n、隐藏宽 d：QKV/输出投影约 O(nd²)，QKᵀ 与 AV 合计 O(n²d)。多头总宽固定时不额外乘 h 到总乘加量；朴素注意力概率占 O(hn²) 内存。"
+      },
+      {
+        "title": "训练推理区别",
+        "content": "FlashAttention 避免显式存完整注意力矩阵，改善访存但不将稠密计算变为线性。带 KV cache 的单 token 解码不同于完整 prefill，应分阶段报告。"
+      }
+    ],
+    "pitfalls": [
+      "只说 O(n²) 而不说明宽度、投影或计算阶段。"
+    ],
+    "followUps": [
+      "长上下文 prefill 与单步 decode 的瓶颈为什么不同？"
+    ],
+    "references": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q043": {
+    "summary": "Adam 用一阶矩平滑梯度方向，用二阶原始矩估计每个坐标的尺度，再做自适应更新。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "mt=β1mt−1+(1−β1)gt；vt=β2vt−1+(1−β2)gt²。做偏差修正后更新 θ←θ−ηm̂/(√v̂+ε)，缓解初始矩估计偏小。"
+      },
+      {
+        "title": "边界与取舍",
+        "content": "二阶矩不是 Hessian，也不是严格意义的中心方差；大梯度坐标通常被缩小步幅。β、ε、学习率及权重衰减共同影响表现，并不保证任意任务优于 SGD。"
+      }
+    ],
+    "pitfalls": [
+      "把二阶矩叫作二阶导数，或把自适应理解成无需调学习率。"
+    ],
+    "followUps": [
+      "去掉偏差修正，训练早期会发生什么？"
+    ],
+    "references": [
+      {
+        "title": "Adam 原论文",
+        "url": "https://arxiv.org/abs/1412.6980"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q044": {
+    "summary": "相同初始化会让同层对称神经元收到相同信号和梯度，无法学到不同特征。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "若输入、连接和初始化均对称，更新后仍对称，多单元退化成重复单元；全零权重还可能阻断前层梯度。随机初始化用于打破这种对称。"
+      },
+      {
+        "title": "具体选择",
+        "content": "常按 fan-in/fan-out 控制方差，如 Xavier 或适配 ReLU 的 He 初始化；偏置常可为零。单个线性/逻辑回归模型没有同样的隐藏单元对称问题，因此不能说零初始化一律不能训练。"
+      }
+    ],
+    "pitfalls": [
+      "把“所有权重相同”与“偏置统一为零”混为一谈。"
+    ],
+    "followUps": [
+      "LoRA 中一个因子为零为何不等于所有网络参数为零？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：监督学习",
+        "url": "https://scikit-learn.org/stable/supervised_learning.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q045": {
+    "summary": "三类排序目标的监督单位分别是单样本、样本对和候选列表，选择取决于标签与上线指标。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "Pointwise 拟合点击概率或相关性；Pairwise 学习正例分数高于负例；Listwise 联合建模列表或使用 NDCG 等指标的可优化替代。"
+      },
+      {
+        "title": "实践取舍",
+        "content": "Pointwise 便于校准但未直接优化相对名次；Pairwise 依赖采样，Listwise 需定义候选组与位置影响。共同面对曝光偏差，应在同候选集比较 NDCG/Recall、校准和成本。"
+      }
+    ],
+    "pitfalls": [
+      "认为 Listwise 必然最好，忽略列表构造和监督质量。"
+    ],
+    "followUps": [
+      "CTR 排序为何仍经常采用 pointwise 交叉熵？"
+    ],
+    "references": [
+      {
+        "title": "BPR 原论文",
+        "url": "https://arxiv.org/abs/1205.2618"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q046": {
+    "summary": "BPR 从隐式反馈构造用户—正物品—负物品三元组，最大化正物品排序更高的概率。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "对 (u,i,j)，令差值 Δ=s(u,i)−s(u,j)，损失为 −logσ(Δ)+λ‖θ‖²。梯度推动 i 相对 j 升分，可搭配矩阵分解或其他打分器。"
+      },
+      {
+        "title": "采样与评估",
+        "content": "i 来自观测交互，j 来自未交互候选；随机/难负例影响梯度与偏差，需注意假负例和未曝光。离线用与线上一致候选协议看 Recall@K、NDCG。"
+      }
+    ],
+    "pitfalls": [
+      "把 BPR 的 sigmoid 分数差当成经过校准的点击概率。"
+    ],
+    "followUps": [
+      "负例越来越难是否一定有益，怎样识别假负例？"
+    ],
+    "references": [
+      {
+        "title": "BPR 原论文",
+        "url": "https://arxiv.org/abs/1205.2618"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q047": {
+    "summary": "特征重要性是针对模型、数据与评价指标的贡献估计，不等于特征的因果影响。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "先做移除特征组并重训的消融；再在留出集做置换重要性，观察指标下降。局部解释可辅助定位个例，树分裂重要性只能作快速诊断。"
+      },
+      {
+        "title": "注意事项",
+        "content": "强相关特征会相互替代，单列置换可能低估贡献；高基数特征可能在某些树重要性中偏高。按人群和时间重复分析，报告方差，同时看线上代价与可用性。"
+      }
+    ],
+    "pitfalls": [
+      "仅凭一次 SHAP 或树重要性排序就删特征。"
+    ],
+    "followUps": [
+      "两列高度相关时，如何估计整个特征组的贡献？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：置换重要性",
+        "url": "https://scikit-learn.org/stable/modules/permutation_importance.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q048": {
+    "summary": "回归先确定预测对象和损失对应的统计量，再从简单可解释基线走向非线性模型。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "线性/岭回归适合作基线，树与梯度提升处理非线性交互，神经网络融合复杂表示；计数、正值或比例目标可考虑相应 GLM，异方差可做分布回归。"
+      },
+      {
+        "title": "目标与评估",
+        "content": "MSE 侧重条件均值，MAE 对应条件中位数，分位数损失用于风险区间。依噪声、样本量和业务成本选模型，时间留出并按目标范围分桶检查残差。"
+      }
+    ],
+    "pitfalls": [
+      "把“回归”限定为线性回归，或对所有目标都无脑 MSE。"
+    ],
+    "followUps": [
+      "预测中位数与均值在长尾时有什么业务差别？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：监督学习",
+        "url": "https://scikit-learn.org/stable/supervised_learning.html"
+      },
+      {
+        "title": "scikit-learn：线性模型",
+        "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q049": {
+    "summary": "观看时长包含零值、重尾、视频长度约束与退出截断，应先明确记录值代表什么。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "可做两阶段：是否有效观看的分类，再预测条件时长；也可离散分桶预测分布/生存概率，或用分位数回归描述不确定性。"
+      },
+      {
+        "title": "偏差与评价",
+        "content": "区分用户主动退出、内容播放完毕和日志截止；视频长度影响可见观看时长，不能把完播直接当潜在兴趣的真实上限。比较 MAE、分桶校准、排序与线上满意度，并按视频长度分组。"
+      }
+    ],
+    "pitfalls": [
+      "只优化总时长导致长视频偏置或忽视重复播放与后台播放。"
+    ],
+    "followUps": [
+      "视频播完的用户，其潜在愿意观看时长是否可直接观测？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：模型评估指标",
+        "url": "https://scikit-learn.org/stable/modules/model_evaluation.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q050": {
+    "summary": "使用平方误差本身不要求数据正态；正态假设只是它的一种概率模型解释。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "在二阶矩存在时，使期望平方误差最小的预测是 E[Y given x]。若条件误差独立、同方差且高斯，最小化 MSE 等价于最大化相应高斯似然。"
+      },
+      {
+        "title": "边界与选择",
+        "content": "正态说的是条件误差而非原始标签。重尾和异常值会放大平方损失，可考虑 Huber、MAE 或分位数损失；异方差时可显式预测方差或采用适当权重。"
+      }
+    ],
+    "pitfalls": [
+      "说“标签不服从正态，因此不能使用 MSE”。"
+    ],
+    "followUps": [
+      "为什么 MSE 预测条件均值，而 MAE 预测条件中位数？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：线性模型",
+        "url": "https://scikit-learn.org/stable/modules/linear_model.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q051": {
+    "summary": "先区分标签边缘分布的多峰与给定特征后的条件多峰；它们需要的模型未必相同。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "正值长尾可试对数变换、Gamma/对数正态分布；大量零值可做 hurdle/零膨胀模型；真正条件多峰可用混合密度网络或离散分桶分布。"
+      },
+      {
+        "title": "评价与限制",
+        "content": "除点误差外看分布似然、区间覆盖和分位数校准。log 空间均值直接 exp 并非原空间均值；混合模型需检查分量退化、方差下界和样本支持。"
+      }
+    ],
+    "pitfalls": [
+      "看到全体标签有两个峰，就断言每个 x 对应两个峰。"
+    ],
+    "followUps": [
+      "为什么混合模型的均值可能落在两个低密度峰之间？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：高斯混合模型",
+        "url": "https://scikit-learn.org/stable/modules/mixture.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q052": {
+    "summary": "评价指标应对应业务损失，并同时展示整体误差、分组误差和相对简单基线的改进。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "MAE 与目标同单位，对异常值较稳；RMSE 放大大误差，MSE 单位平方；R² 衡量相对均值预测的改善，可能为负。分位数预测用 pinball loss，区间看覆盖率及宽度。"
+      },
+      {
+        "title": "实际选择",
+        "content": "MAPE 在真值接近零时不稳定；长尾目标应分桶，并报告总量偏差。以时间留出评估未来预测，不能仅选择数字最好看的单一指标。"
+      }
+    ],
+    "pitfalls": [
+      "把不同数据集的 R² 或未说明归一化的误差直接比较。"
+    ],
+    "followUps": [
+      "如果大客户误差更重要，应怎样设计加权指标？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：模型评估指标",
+        "url": "https://scikit-learn.org/stable/modules/model_evaluation.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q053": {
+    "summary": "ROC 描述阈值变化时真正率与假正率的取舍；AUC 概括排序区分能力，不衡量概率校准。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "横轴 FPR=FP/(FP+TN)，纵轴 TPR=TP/(TP+FN)。AUC 可解释为随机正例得分高于随机负例的概率，平分通常按半次计。"
+      },
+      {
+        "title": "应用边界",
+        "content": "类别极不平衡时还应看 PR 曲线及实际阈值下的精确率/召回率。全局 AUC 不必反映每个用户候选内排序，也无法直接决定收益最优阈值。"
+      }
+    ],
+    "pitfalls": [
+      "AUC 高就认为预测 0.8 的样本真有约 80% 转化率。"
+    ],
+    "followUps": [
+      "为什么严格单调变换分数不改变 AUC，却可能改变校准？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：模型评估指标",
+        "url": "https://scikit-learn.org/stable/modules/model_evaluation.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q054": {
+    "summary": "注意力层的参数由投影维度决定，序列长度主要改变计算和缓存，不直接改变标准投影参数量。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "输入宽 d、h 个头且 dh=d/h 的标准 MHA，Q/K/V/O 四个 d×d 矩阵共约 4d²，另计偏置；固定总宽时增加头数通常不改变这一主项。"
+      },
+      {
+        "title": "推广计算",
+        "content": "GQA 中 K/V 输出宽为 hkv·dh，因此参数为 d(hq·dh+2hkv·dh)+hq·dh·d。若问整层 Transformer，FFN、归一化和其他模块必须另算。"
+      }
+    ],
+    "pitfalls": [
+      "把 n² 注意力矩阵当成训练参数，或混淆参数量与激活量。"
+    ],
+    "followUps": [
+      "固定 d 时增加头数，哪些开销仍可能改变？"
+    ],
+    "references": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      },
+      {
+        "title": "GQA 原论文",
+        "url": "https://arxiv.org/abs/2305.13245"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q055": {
+    "summary": "先定位显存峰值属于权重、优化器、激活还是评估缓存，再选择对应措施。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "激活大时减 micro-batch/序列长度、减少 padding、用梯度检查点和高效注意力；模型状态大时考虑混合精度、LoRA/QLoRA、分片或 offload。"
+      },
+      {
+        "title": "诊断与取舍",
+        "content": "记录峰值与触发 batch，检查是否保存带计算图的 loss/tensor。梯度累积可维持有效 batch，但不能降低单条超长序列的最低需求；重计算与 offload 会增加时间。"
+      }
+    ],
+    "pitfalls": [
+      "只清空 CUDA cache，却忽视仍被引用的张量和真实活跃内存。"
+    ],
+    "followUps": [
+      "为什么 LoRA 已很省参数，长序列训练仍会 OOM？"
+    ],
+    "references": [
+      {
+        "title": "Hugging Face：降低训练显存",
+        "url": "https://huggingface.co/docs/trl/reducing_memory_usage"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q056": {
+    "summary": "LongLoRA 面向长上下文扩展，不只是把 LoRA rank 调大或输入长度参数改大。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "它在训练使用 shifted sparse attention，使局部组间通过移位交换信息；结合 LoRA，并放开 embedding 与 normalization 的训练来改善长上下文适配。"
+      },
+      {
+        "title": "训练与推理",
+        "content": "论文方案训练阶段节省注意力成本，推理可使用标准全局注意力；不是要求线上永久改成相同稀疏模式。评估长文本困惑度、跨距离检索与短任务退化，复现需对齐位置扩展配置。"
+      }
+    ],
+    "pitfalls": [
+      "把稀疏训练带来的开销优势直接当作同倍数的线上加速。"
+    ],
+    "followUps": [
+      "为什么只训练 LoRA 而冻结 embedding/norm 可能效果不足？"
+    ],
+    "references": [
+      {
+        "title": "LongLoRA 原论文",
+        "url": "https://arxiv.org/html/2309.12307v3"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q057": {
+    "summary": "扩展上下文涉及位置编码、训练数据和注意力/缓存资源，单纯提高 max length 不等于获得有效长程能力。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "可使用位置插值、RoPE 频率调整并继续长文本训练，也可用窗口/稀疏/分布式注意力降低成本。YaRN 组合分频段插值与 attention scaling。"
+      },
+      {
+        "title": "关键取舍",
+        "content": "统一位置缩放是一种基线，但可能损伤部分高频/局部信息；YaRN 分频段处理并配合 attention-logit 缩放。扩展后需同时测长程检索、综合理解、不同证据位置与短上下文保持；困惑度下降不是完整证明。"
+      }
+    ],
+    "pitfalls": [
+      "把通过单针检索测试当成模型已能理解所有长文任务。"
+    ],
+    "followUps": [
+      "YaRN 的 attention scaling 与生成 temperature 是同一东西吗？"
+    ],
+    "references": [
+      {
+        "title": "YaRN 原论文（v2）",
+        "url": "https://arxiv.org/html/2309.00071v2"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q058": {
+    "summary": "SFT 数据应表达真实目标行为，模板、角色、结束标记与损失掩码必须保持一致。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "构造 instruction/input/output 或 messages，覆盖正常、边界、无答案和纠错场景；做去重、隐私与质量检查，按源文档/用户划分训练验证，避免同题改写泄漏。"
+      },
+      {
+        "title": "实现核查",
+        "content": "采用基座匹配的 chat template，检查 token 化后角色与 EOS；按目标选择 assistant-only 或 completion-only loss，padding 不计损失。抽查截断是否删掉答案，并核验 packing 的边界处理。"
+      }
+    ],
+    "pitfalls": [
+      "只看 JSON 格式正确，不检查最终 token 和 label。"
+    ],
+    "followUps": [
+      "如何用一个短样本检查哪些 token 真正产生训练损失？"
+    ],
+    "references": [
+      {
+        "title": "Hugging Face：Chat templates",
+        "url": "https://huggingface.co/docs/transformers/chat_templating"
+      },
+      {
+        "title": "Hugging Face：SFT Trainer",
+        "url": "https://huggingface.co/docs/trl/sft_trainer"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q059": {
+    "summary": "SFT 过拟合要结合留出任务表现、训练曲线和泛化测试判断，不能只靠训练 loss。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "若训练 loss 持续下降而独立验证 loss/任务质量恶化，考虑过拟合；按来源、实体或时间隔离数据，对未见表达和困难样本评估，防止近重复让验证分数虚高。"
+      },
+      {
+        "title": "诊断与修复",
+        "content": "同时检查通用能力遗忘、复读、格式与拒答变化；比较不同 checkpoint。可减少轮次、降学习率、加强数据多样性或正则，并保留基座对照。"
+      }
+    ],
+    "pitfalls": [
+      "验证集与训练集共享文档模板/答案，仍宣称泛化很好。"
+    ],
+    "followUps": [
+      "验证 loss 下降但业务评分下降，你会检查哪些目标错位？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：学习曲线",
+        "url": "https://scikit-learn.org/stable/modules/learning_curve.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q060": {
+    "summary": "Encoder-only 利于双向表示和判别任务；Decoder-only 擅长统一生成接口，理解能力取决于训练而非名称。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "BERT 类编码器可让每个位置同时利用左右上下文，适合分类、序列标注、匹配；解码器用因果掩码，可通过提示或 SFT 输出标签、抽取结果与解释。"
+      },
+      {
+        "title": "选型取舍",
+        "content": "比较同预算下准确率、延迟、吞吐和输出约束；小编码器部署通常更轻，生成模型能覆盖多任务但需处理格式和幻觉。不要把 Transformer 与 BERT 当互斥架构。"
+      }
+    ],
+    "pitfalls": [
+      "声称 Decoder-only 因不能看未来就无法理解完整输入。"
+    ],
+    "followUps": [
+      "分类任务用生成式标签输出，怎样避免标签 token 长度偏差？"
+    ],
+    "references": [
+      {
+        "title": "BERT 原论文",
+        "url": "https://arxiv.org/abs/1810.04805"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q061": {
+    "summary": "PPO 是策略优化算法；DPO 用成对偏好直接优化策略，不需标准流程中的显式奖励模型及在线采样循环。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "RLHF-PPO 通常用奖励模型评分采样回答，结合价值估计、优势和裁剪目标，并约束偏离参考策略。DPO 对 chosen/rejected 的策略与参考策略对数概率差做 logistic 优化。"
+      },
+      {
+        "title": "取舍与条件",
+        "content": "DPO 简化训练但依赖偏好覆盖和质量；PPO 可基于当前策略采样，但成本和稳定性压力更大。DPO 的等价推导有奖励/偏好模型及 KL 正则等假设，不是任何 RL 的替代。"
+      }
+    ],
+    "pitfalls": [
+      "把 DPO 说成“完全没有奖励概念”，或 PPO 天然比 DPO 更好。"
+    ],
+    "followUps": [
+      "离线偏好与当前模型分布不匹配时会发生什么？"
+    ],
+    "references": [
+      {
+        "title": "DPO 原论文",
+        "url": "https://arxiv.org/abs/2305.18290"
+      },
+      {
+        "title": "PPO 原论文",
+        "url": "https://arxiv.org/abs/1707.06347"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q062": {
+    "summary": "若任务需要跨整篇信息综合且材料能放入有效上下文，长文本可能减少检索漏证据；否则 RAG 更经济可控。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "合同对照、全篇摘要和多处线索综合可优先试长上下文；大规模、频繁更新且权限复杂的知识库通常适合 RAG。两者也可结合，先选文档再读长片段。"
+      },
+      {
+        "title": "比较方式",
+        "content": "用相同问题集衡量正确率、引用覆盖、成本与延迟，加入“证据在中间”和跨文档任务。结论依赖模型、预算和数据，不能从一篇基准外推所有业务。"
+      }
+    ],
+    "pitfalls": [
+      "认为上下文窗口装得下，就必然能稳定利用所有内容。"
+    ],
+    "followUps": [
+      "如何设计实验证明失败确实源自检索而非模型阅读能力？"
+    ],
+    "references": [
+      {
+        "title": "RAG 与长上下文对比研究",
+        "url": "https://arxiv.org/abs/2407.16833"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q063": {
+    "summary": "微调应解决稳定、重复出现且有高质量监督的行为缺口，而不是先微调再寻找理由。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "先建立评估集，试清晰指令、少样本和必要检索；将残余错误分为知识缺失、格式/风格、任务能力和工具问题。固定工作流仍难达标，且有代表性样本时再做小规模 SFT 对照。"
+      },
+      {
+        "title": "决策标准",
+        "content": "比较未见样本质量、token/延迟成本和通用能力保持。频繁变化事实更适合 RAG；工具权限与系统故障不靠微调解决。上线前保留回滚和基座基线。"
+      }
+    ],
+    "pitfalls": [
+      "提示词试了几版就断言只能微调，或把知识更新问题当格式学习。"
+    ],
+    "followUps": [
+      "何种错误更适合新增检索证据而不是新增 SFT 数据？"
+    ],
+    "references": [
+      {
+        "title": "Hugging Face：SFT Trainer",
+        "url": "https://huggingface.co/docs/trl/sft_trainer"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q064": {
+    "summary": "验证集用于选模型与调超参，测试集用于最后估计所选方案泛化；混用会对测试集产生选择性过拟合。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "训练集拟合参数，验证集比较提示、阈值、超参和 checkpoint；方案确定后才查看测试结果。数据少可交叉验证，但最终评估仍需独立。"
+      },
+      {
+        "title": "隔离与复用",
+        "content": "按实体、用户或时间分组防泄漏；若反复看测试错误并据此修改，它已变成开发集，应另留新测试。报告切分方式、样本量与不确定性，不只报最优一次。"
+      }
+    ],
+    "pitfalls": [
+      "认为没有用测试样本反向传播，就不算测试泄漏。"
+    ],
+    "followUps": [
+      "调整决策阈值应在哪个集合进行，为什么？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：交叉验证",
+        "url": "https://scikit-learn.org/stable/modules/cross_validation.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q065": {
+    "summary": "RoBERTa 主要改进 BERT 的训练配方，而非另造一种注意力架构。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "BERT 使用 masked language modeling 和 next sentence prediction；RoBERTa 移除 NSP，采用动态 masking，并调整数据规模、训练时长、batch 和文本组织等设置。"
+      },
+      {
+        "title": "解释边界",
+        "content": "动态 masking 让同一句在不同训练时刻可能遮不同 token。论文强调训练不足影响比较；不能把收益全部归因于去掉 NSP。复现需控制数据、tokenizer、步数及算力。"
+      }
+    ],
+    "pitfalls": [
+      "说 RoBERTa 是 Decoder-only，或“删 NSP 一定提升任何模型”。"
+    ],
+    "followUps": [
+      "如何设计消融来分开动态 masking 与训练预算的贡献？"
+    ],
+    "references": [
+      {
+        "title": "BERT 原论文",
+        "url": "https://arxiv.org/abs/1810.04805"
+      },
+      {
+        "title": "RoBERTa 原论文",
+        "url": "https://arxiv.org/abs/1907.11692"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q066": {
+    "summary": "MHA/MQA/GQA 主要改变 KV 头共享程度；MLA 则压缩 KV 的潜在表示，机制不同。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "MHA 每个查询头有对应 KV；MQA 所有查询头共享一组 KV；GQA 在若干组内共享。它们主要降低生成时 KV cache 与带宽，需权衡质量。"
+      },
+      {
+        "title": "MLA 与评估",
+        "content": "MLA 将 KV 联合压到低维 latent，并配合解耦位置部分。比较要固定模型规模和质量目标，实测长短输入下吞吐、延迟及缓存，不能只比头数就判定性能。"
+      }
+    ],
+    "pitfalls": [
+      "把 MLA 简单说成“比 GQA 分组更少的 MQA”。"
+    ],
+    "followUps": [
+      "为什么 KV cache 变小对 decode 通常特别重要？"
+    ],
+    "references": [
+      {
+        "title": "GQA 原论文",
+        "url": "https://arxiv.org/abs/2305.13245"
+      },
+      {
+        "title": "DeepSeek-V2：MLA 原论文",
+        "url": "https://arxiv.org/html/2405.04434v5"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q067": {
+    "summary": "MLA 将内容与位置分支解耦，避免 RoPE 阻碍低秩投影在推理时的矩阵吸收。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "若对恢复后的内容 K 直接旋转，位置相关矩阵会夹在投影之间，不能按普通矩阵乘法任意交换。DeepSeek-V2 单独产生带 RoPE 的查询和共享位置键，与内容部分拼接计算分数。"
+      },
+      {
+        "title": "缓存细节",
+        "content": "缓存压缩 KV latent 以及位置键，而非只缓存一个低秩向量；内容投影可利用吸收优化。缓存量取决于 latent 维度、位置维度、层数、精度与 token 数。"
+      }
+    ],
+    "pitfalls": [
+      "声称 MLA 完全不用 RoPE，或把旋转矩阵随意交换到投影另一侧。"
+    ],
+    "followUps": [
+      "为什么给所有 latent 维度直接做 RoPE 不等价于论文方案？"
+    ],
+    "references": [
+      {
+        "title": "DeepSeek-V2：MLA 原论文",
+        "url": "https://arxiv.org/html/2405.04434v5"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q068": {
+    "summary": "线性层本质是对最后一维做仿射变换，重点是参数注册、维度、初始化与梯度验证。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "PyTorch 约定 W 形状为 (out_features,in_features)，前向 y=x@W.T+b；x 可含任意前导批维。W、b 必须是 nn.Parameter，否则优化器可能看不到。"
+      },
+      {
+        "title": "反向与测试",
+        "content": "将批维展平时，若 G=∂L/∂y，则 ∂W=GᵀX、∂X=GW、∂b=ΣG。用相同权重对照 nn.Linear，测多维输入、无 bias、dtype/device 与 gradcheck。"
+      },
+      {
+        "title": "最小 PyTorch 实现（学习用）",
+        "content": "import torch\nfrom torch import nn\n\nclass Linear(nn.Module):\n    def __init__(self, din, dout, bias=True):\n        super().__init__()\n        self.weight = nn.Parameter(torch.empty(dout, din))\n        self.bias = nn.Parameter(torch.empty(dout)) if bias else None\n        bound = din ** -0.5\n        nn.init.uniform_(self.weight, -bound, bound)\n        if self.bias is not None:\n            nn.init.uniform_(self.bias, -bound, bound)\n\n    def forward(self, x):\n        y = x @ self.weight.T\n        return y if self.bias is None else y + self.bias\n\n# 要求 din > 0；用 module.to(device/dtype) 迁移参数。"
+      }
+    ],
+    "pitfalls": [
+      "把 W 放成普通 tensor，或沿特征维求 bias 梯度。"
+    ],
+    "followUps": [
+      "为什么多个没有非线性的线性层仍能合并成一个仿射层？"
+    ],
+    "references": [
+      {
+        "title": "PyTorch：Linear",
+        "url": "https://docs.pytorch.org/docs/2.14/generated/torch.nn.Linear.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q069": {
+    "summary": "平方根缩放用于控制点积分数随维度增长的尺度，使 softmax 不易过早饱和。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "在 q、k 分量独立、零均值且方差约为 1 的近似假设下，q·k 的方差约为 dk；除 √dk 使方差量级稳定。若不缩放，分布易过尖，梯度可能变小。"
+      },
+      {
+        "title": "边界与理解",
+        "content": "真实训练中分量不必满足独立单位方差，所以这是一种尺度分析而非恒等证明；归一化、学习温度等也会改变分数分布。应与生成采样温度区分。"
+      }
+    ],
+    "pitfalls": [
+      "说点积的均值必然随维度线性增加，或缩放能保证所有梯度稳定。"
+    ],
+    "followUps": [
+      "如果 q、k 已做单位长度归一化，分数尺度还一样吗？"
+    ],
+    "references": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q070": {
+    "summary": "RAG 将知识检索与生成连接成可更新的证据链，生产系统还需权限、版本和分层评估。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "离线：解析清洗、结构化切块、附元数据、建稀疏/向量索引。在线：理解查询、权限过滤、多路召回、重排、选证据、生成带出处答案；证据不足时说明未知。"
+      },
+      {
+        "title": "验证与维护",
+        "content": "分别测召回命中、重排、忠实性和最终正确率，记录延迟与成本。增量更新需同步索引与删除，引用回到文档位置；检索内容不能覆盖系统安全规则。"
+      }
+    ],
+    "pitfalls": [
+      "把“向量数据库接大模型”当成完整流程，不检查证据是否被正确使用。"
+    ],
+    "followUps": [
+      "答案错了，如何定位是解析、检索、重排还是生成阶段？"
+    ],
+    "references": [
+      {
+        "title": "RAG 原论文",
+        "url": "https://arxiv.org/abs/2005.11401"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q071": {
+    "summary": "微调流程从任务和评估定义开始，以可复现小实验验证收益，再扩大训练与上线。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "先建立基座/提示基线；清洗、去重并隔离数据，核对模板与标签；按显存选全参、LoRA 或 QLoRA，记录版本、种子、有效 batch、学习率及数据配方。"
+      },
+      {
+        "title": "验收与部署",
+        "content": "做小样本过拟合 sanity check，再跑正式训练；同时评估目标任务、通用能力、安全与成本。保存基座/adapter 兼容信息，核验加载和合并后的输出再灰度。"
+      }
+    ],
+    "pitfalls": [
+      "只交付训练 loss 和权重，不保留 tokenizer、模板及配置。"
+    ],
+    "followUps": [
+      "如何证明改进来自训练而非评测数据泄漏？"
+    ],
+    "references": [
+      {
+        "title": "Hugging Face：LoRA 参数与实现",
+        "url": "https://huggingface.co/docs/peft/v0.21.0/package_reference/lora"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q072": {
+    "summary": "学习率不是孤立常数，要和优化器、可训练参数、有效 batch、token 数及调度共同选择。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "以可信基线为起点，按对数尺度小范围试验学习率；观察验证质量、梯度范数和是否发散。可 warmup 后衰减，固定训练 token 预算比较，不只固定步数。"
+      },
+      {
+        "title": "调参边界",
+        "content": "有效 batch=单卡 micro-batch×累积步数×数据并行数；变长序列还需看 token batch。全参与 LoRA 最优值未必相同，batch 增大也不保证学习率可无限线性放大。"
+      }
+    ],
+    "pitfalls": [
+      "只因 loss 下降更快就选择更大学习率，忽视最终泛化和遗忘。"
+    ],
+    "followUps": [
+      "改变梯度累积后，哪些调度和评估频率需要重算？"
+    ],
+    "references": [
+      {
+        "title": "Hugging Face：LoRA 参数与实现",
+        "url": "https://huggingface.co/docs/peft/v0.21.0/package_reference/lora"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q073": {
+    "summary": "LoRA 是低秩适配方法；QLoRA 进一步把冻结基座量化，以降低训练的模型存储开销。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "QLoRA 通过冻结的 4-bit 基座反传到 LoRA 参数，使用 NF4、双重量化和分页优化器等技术；计算并不全在 4-bit 上进行，适配器通常保持较高精度。"
+      },
+      {
+        "title": "选择与验证",
+        "content": "显存紧时可考虑 QLoRA；需权衡量化误差、算子支持、速度和部署格式。评估同数据/预算下质量，核对量化加载与合并路径，别把节省权重显存等同于消除激活内存。"
+      }
+    ],
+    "pitfalls": [
+      "认为 QLoRA 会直接训练所有 4-bit 基座权重。"
+    ],
+    "followUps": [
+      "NF4 权重存储精度与矩阵乘计算 dtype 有什么区别？"
+    ],
+    "references": [
+      {
+        "title": "QLoRA 原论文",
+        "url": "https://arxiv.org/abs/2305.14314"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q074": {
+    "summary": "一万份 PDF 首先是文档治理与检索工程问题，不足以直接推出“要训练一个垂直大模型”。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "先明确问答、抽取还是写作任务；盘点版权、隐私、版本和扫描比例。抽样建立金标问答，做 OCR/版面与表格解析，保留页码来源，再搭混合检索、重排和有据回答基线。"
+      },
+      {
+        "title": "分阶段方案",
+        "content": "用失败归因决定改解析、切块、召回还是微调；领域表达/格式缺口可再做 SFT。按文档隔离评估，检测无答案与冲突版本；权限过滤和撤回删除贯穿索引与输出。"
+      }
+    ],
+    "pitfalls": [
+      "把 PDF 全转文本直接塞进训练，期望模型记住并能准确引用。"
+    ],
+    "followUps": [
+      "如果答案在表格跨页，你会先改哪一层？"
+    ],
+    "references": [
+      {
+        "title": "RAG 原论文",
+        "url": "https://arxiv.org/abs/2005.11401"
+      },
+      {
+        "title": "RAG 与长上下文对比研究",
+        "url": "https://arxiv.org/abs/2407.16833"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q075": {
+    "summary": "扩散模型训练学习从加噪状态恢复数据的信息，生成从噪声出发逐步去噪；训练与采样输入要分开讲。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "DDPM 前向按噪声日程加高斯噪声，训练可直接采样 xt=√ᾱt x0+√(1−ᾱt)ε，并预测噪声等目标。采样通常从 xT≈N(0,I) 开始，给定 t 逐步预测并更新。"
+      },
+      {
+        "title": "条件与取舍",
+        "content": "条件生成还输入文本/类别等，latent diffusion 在压缩潜空间去噪后解码。更多采样步通常增加成本，效果还取决于调度与采样器；区分随机 DDPM 与其他采样方案。"
+      }
+    ],
+    "pitfalls": [
+      "说采样时必须先提供真实图像 x0；这只适用于某些图像条件任务。"
+    ],
+    "followUps": [
+      "噪声预测、x0 预测与 v 预测各自怎样转换？"
+    ],
+    "references": [
+      {
+        "title": "DDPM 原论文",
+        "url": "https://arxiv.org/abs/2006.11239"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q076": {
+    "summary": "Decoder-only 通过 causal mask 阻止位置 i 的注意力访问 j>i，训练可以并行但信息流仍是因果的。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "在 softmax 前把未来位置的注意力 logits 置为负无穷，使其权重为零；同时处理 padding。输入序列与标签错一位，用前缀预测下一个 token。"
+      },
+      {
+        "title": "实现检查",
+        "content": "推理带 KV cache 时需正确对齐绝对/相对位置和 mask；packed 多样本训练要避免跨样本泄漏。用修改未来 token 不影响此前 logits 的测试检查因果性。"
+      }
+    ],
+    "pitfalls": [
+      "只把输入遮掉未来部分却遗漏掩码，或标签位移重复一次。"
+    ],
+    "followUps": [
+      "为什么训练可一次计算整段，而推理通常逐 token 生成？"
+    ],
+    "references": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      },
+      {
+        "title": "Hugging Face：Chat templates",
+        "url": "https://huggingface.co/docs/transformers/chat_templating"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q077": {
+    "summary": "LoRA 与 Adapter 都冻结大部分基座、训练少量参数，但修改位置和推理结构不同。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "LoRA 在原线性映射旁增加低秩权重增量，可在适配条件下合并成原矩阵；经典 Adapter 在网络层间插入带非线性的瓶颈模块，通常保留额外前向计算。"
+      },
+      {
+        "title": "取舍与验证",
+        "content": "二者均要考虑目标层、瓶颈/rank、任务切换与存储成本。LoRA 未合并或动态多适配器时仍可能有开销；Adapter 的非线性一般不能简单吸收到一个线性权重中。"
+      }
+    ],
+    "pitfalls": [
+      "无条件宣称 LoRA 推理永远零开销，忽略加载/量化和多适配器实现。"
+    ],
+    "followUps": [
+      "为什么经典非线性 Adapter 通常不能像 LoRA 一样合并？"
+    ],
+    "references": [
+      {
+        "title": "Adapter 原论文",
+        "url": "https://arxiv.org/abs/1902.00751"
+      },
+      {
+        "title": "LoRA 原论文",
+        "url": "https://arxiv.org/abs/2106.09685"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q079": {
+    "summary": "VAE 以潜变量编码/解码和变分目标训练；Diffusion 学习逐步去噪，采样成本与细节表现的权衡不同。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "VAE 优化重建项与 KL，采样潜变量后一次解码；Diffusion 通常多步迭代生成。像素高斯似然/MSE 的 VAE 在多种合理细节间可能倾向条件平均，表现为模糊。"
+      },
+      {
+        "title": "避免绝对化",
+        "content": "模糊还与潜空间容量、解码器和 KL 权衡有关，并非所有 VAE 必然模糊。两者可组合：latent diffusion 借助自编码器潜空间降低扩散成本。比较质量、多样性、重建与采样速度。"
+      }
+    ],
+    "pitfalls": [
+      "把 VAE 的模糊完全归咎于“加入随机噪声”，或认为两类模型互斥。"
+    ],
+    "followUps": [
+      "改用感知/对抗重建目标会改变什么，又有什么风险？"
+    ],
+    "references": [
+      {
+        "title": "Auto-Encoding Variational Bayes",
+        "url": "https://arxiv.org/abs/1312.6114"
+      },
+      {
+        "title": "DDPM 原论文",
+        "url": "https://arxiv.org/abs/2006.11239"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q080": {
+    "summary": "分数融合必须先说明各分数的含义、尺度与业务目标，再选校准、加权或学习式融合。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "同一目标模型可用校准后的加权平均或 out-of-fold stacking；不同目标可结合 pCTR、条件 pCVR 和价值构造期望收益，也可做约束下的多目标优化。"
+      },
+      {
+        "title": "上线验证",
+        "content": "权重在验证集或受控实验中选择，监测用户体验与长期指标。若只关心顺序可融合排名；若乘金额则需概率校准。注意多个分数相关性，防止重复计入同一信号。"
+      }
+    ],
+    "pitfalls": [
+      "把无量纲排序分、点击概率和时长不经处理直接相加。"
+    ],
+    "followUps": [
+      "pCVR 若已是曝光到转化概率，是否还应再乘 pCTR？"
+    ],
+    "references": [
+      {
+        "title": "scikit-learn：概率校准",
+        "url": "https://scikit-learn.org/stable/modules/calibration.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q081": {
+    "summary": "Transformer 是架构家族，BERT 是采用其编码器并以双向预训练得到的具体模型，二者不是并列替代品。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "原始 encoder-decoder Transformer 面向序列到序列，如翻译；编码器变体用于分类、检索表示与标注，因果解码器用于生成。BERT 常通过微调任务头做理解类任务。"
+      },
+      {
+        "title": "推荐场景",
+        "content": "可用 Transformer 对用户行为序列建模，也可用 BERT 编码物品文本；是否适合在线推荐还取决于任务、mask、候选规模与延迟，不由模型名字决定。"
+      }
+    ],
+    "pitfalls": [
+      "说 Transformer 只适合生成，而 BERT 才使用注意力。"
+    ],
+    "followUps": [
+      "将双向序列模型用于下一物品预测时如何防止未来行为泄漏？"
+    ],
+    "references": [
+      {
+        "title": "BERT 原论文",
+        "url": "https://arxiv.org/abs/1810.04805"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  },
+  "q082": {
+    "summary": "LTV 要先定义观察时点、预测窗口与价值口径，再处理零值、长尾、延迟和删失。",
+    "sections": [
+      {
+        "title": "60 秒回答",
+        "content": "可预测未来 T 天收入/利润的条件期望；做是否付费与付费金额两阶段，或零膨胀对数正态等概率模型。也可分解留存、交易频次与客单价，但依赖相应假设。"
+      },
+      {
+        "title": "评估与业务",
+        "content": "用成熟 cohort 时间外验证，防止未来特征泄漏；同时看总量校准、分位误差、头部用户排序和投放收益。窗口未走完的数据需明确删失处理，不能当成完整低 LTV。"
+      }
+    ],
+    "pitfalls": [
+      "直接对 log(金额) 回归后指数还原就当无偏收入均值。"
+    ],
+    "followUps": [
+      "30 天 LTV 标签尚未成熟时，怎样避免系统性低估新用户？"
+    ],
+    "references": [
+      {
+        "title": "Google Research：LTV 概率建模",
+        "url": "https://research.google/pubs/a-deep-probabilistic-model-for-customer-lifetime-value-prediction/"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核"
+  }
+}

@@ -1,0 +1,746 @@
+{
+  "q001": {
+    "summary": "三者的核心区别是“哪些参数共享、共享多少、由谁决定”。Shared-Bottom 全任务共用底层；MMoE 让各任务门控选择共享专家；PLE 再显式分离共享与任务专属专家，并逐层提取。结构升级不保证所有目标同时变好。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "先明确任务：如 CTR、时长和互动，样本覆盖和标签延迟不同。Shared-Bottom 成本低，是必要基线，但共享表示容易被高频任务主导。",
+          "MMoE 中每个任务有自己的 gate，对同一组专家加权，能学习不同的任务关系。PLE 让任务门控使用本任务专家与共享专家，共享分支可汇聚各任务信息，再多层传递。",
+          "我会在等参数量/等延迟预算下对比单任务、Shared-Bottom、MMoE、PLE，分别看各目标及主业务指标，不仅看加权总损失。"
+        ]
+      },
+      {
+        "title": "公式与落地",
+        "content": "MMoE：h_k(x)=Σ_e g_{k,e}(x) f_e(x)，g_k=softmax(W_k x)，再接任务塔。监控 gate 熵、专家负载、任务梯度夹角与低样本任务收益；门控塌缩时先检查数据和损失权重，而非直接增加专家。"
+      }
+    ],
+    "pitfalls": [
+      "PLE 不是“给 MMoE 加几层”而已，关键还在共享/专属路径。",
+      "ESMM 主要利用点击—转化概率分解与全空间训练，并非上述共享结构的同义词。"
+    ],
+    "followUps": [
+      "任务相关性为负，是否应该完全拆塔？",
+      "标签不全时如何设计 mask 和归一化？",
+      "如何判断收益来自结构而非参数增加？"
+    ],
+    "references": [
+      {
+        "title": "MMoE 原论文（Google Research）",
+        "url": "https://research.google/pubs/modeling-task-relationships-in-multi-task-learning-with-multi-gate-mixture-of-experts/"
+      },
+      {
+        "title": "PLE 原论文 DOI（出版页面可能限制访问）",
+        "url": "https://doi.org/10.1145/3383313.3412236"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "sourceNote": "MMoE 原始研究页面已核对；PLE 出版页面本次返回访问限制，所述结构仍需人工对原文复核。Shared-Bottom 为对比扩展知识，不意味着面经原文逐项提问。",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q002": {
+    "summary": "损失数值相近不代表优化影响相近。应先对齐样本口径和 reduction，再观察共享参数上的梯度大小、方向与学习速度；业务权重、数值尺度和梯度冲突要分开处理。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "目标写成 L=Σ_k λ_k L_k。先排查 sum/mean、有效标签数、回归目标单位、负采样倍率，保证每个任务的损失口径稳定。",
+          "用固定权重搜索建立可解释基线；若某任务梯度长期占优，可尝试 GradNorm 等动态权重，但不能把自动权重当作业务优先级。",
+          "若 g_i·g_j<0，说明共享参数局部更新方向有冲突，可尝试 PCGrad 或减少共享。最终必须分别报告各任务和业务约束下的 Pareto 权衡。"
+        ]
+      },
+      {
+        "title": "梯度层面",
+        "content": "PCGrad 的一类投影：当 g_i·g_j<0 时，g_i ← g_i − (g_i·g_j / ||g_j||²)g_j。实现要处理零范数、任务遍历顺序和额外反向传播开销；一次负夹角不证明长期负迁移。"
+      }
+    ],
+    "pitfalls": [
+      "只让 loss 数值相等，可能仍由一个任务控制更新。",
+      "标签稀疏任务按全 batch 平均，可能被无意降权。"
+    ],
+    "followUps": [
+      "动态权重是否会牺牲最重要的业务目标？",
+      "梯度冲突应在哪些共享层测量？",
+      "如何区分噪声冲突与真实负迁移？"
+    ],
+    "references": [
+      {
+        "title": "PCGrad 原论文",
+        "url": "https://arxiv.org/abs/2001.06782"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q003": {
+    "summary": "召回在有限延迟内把全库缩小为候选集，重点是相关性、覆盖和互补性。协同过滤、双塔语义召回、规则与热门召回通常互补，不存在单一方法在所有用户和物品阶段都最好。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "先按目标拆召回通道：行为相似、语义匹配、关注关系、实时热点、新品探索。多路合并后去重和配额控制，再交给排序。",
+          "UserCF 根据相似用户的行为推荐，依赖足够用户重叠；ItemCF 根据用户历史物品找相似物品，适合物品关系较稳定、用户兴趣可由历史表达的场景。二者都要处理热门偏置和行为时间衰减。",
+          "双塔可离线编码物品、在线编码用户并 ANN 检索，便于引入内容特征，但交互表达能力受独立编码约束。"
+        ]
+      },
+      {
+        "title": "评估与边界",
+        "content": "使用时间切分的 Recall@K、候选命中率、覆盖率及端到端收益；同时测索引更新时效、P95 延迟和单通道边际增益。增加候选数提高 recall，也会增加下游成本；离线候选标签受旧策略曝光限制。"
+      }
+    ],
+    "pitfalls": [
+      "“用户少就一定 UserCF、物品少就一定 ItemCF”过于粗糙，还取决于稀疏度、更新频率和存储。",
+      "ANN 近似检索损失与模型表示损失需分开评估。"
+    ],
+    "followUps": [
+      "如何评估多路召回的独立贡献？",
+      "新品没有交互怎么进入召回？",
+      "召回与排序目标不一致怎么办？"
+    ],
+    "references": [
+      {
+        "title": "YouTube 两阶段推荐原论文",
+        "url": "https://research.google/pubs/deep-neural-networks-for-youtube-recommendations/"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q004": {
+    "summary": "Attention 通过内容相关的加权聚合建立依赖；RNN 以状态递推压缩历史，CNN 以局部卷积组合上下文。选择取决于序列长度、在线更新方式和算力，而不只是模型年代。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "缩放点积注意力为 softmax(QKᵀ/√d_k + M)V。它直接连接远距离位置、训练可并行，但普通全注意力有 O(T²) 的注意力矩阵。",
+          "RNN 适合流式状态更新，训练的时间步依赖限制并行；CNN 有局部归纳偏置，可通过深层或膨胀卷积扩大感受野。",
+          "推荐中目标 item 对用户行为的 attention 与无目标的自注意力不同：前者直接做候选相关兴趣提取，后者更利于缓存通用序列表征。"
+        ]
+      },
+      {
+        "title": "为什么除 √d_k",
+        "content": "在 q、k 各维近似独立、零均值、方差约为 1 的假设下，点积方差约为 d_k；缩放避免 logits 过大导致 softmax 饱和。这个解释依赖统计假设，并非任意训练状态下的严格等式。测长序列效果时同时报告显存、吞吐和服务延迟。"
+      }
+    ],
+    "pitfalls": [
+      "自注意力本身不携带顺序，需要位置机制或结构约束。",
+      "FlashAttention 改善 IO 与中间存储，不把标准精确全注意力的算术复杂度改成线性。"
+    ],
+    "followUps": [
+      "因果 mask 和 padding mask 有何区别？",
+      "自回归推理为什么仍是逐 token 生成？",
+      "如何将候选相关 attention 用于大规模召回？"
+    ],
+    "references": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q005": {
+    "summary": "BN 与 LN 的核心是统计轴不同。BN 在 batch（卷积中还包括空间轴）上按通道统计；Transformer 常见 LN 对每个 token 的隐藏维统计，因此不依赖其他样本。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "归一化统一写成 y=γ(x−μ)/√(σ²+ε)+β，差别在 μ、σ² 的计算范围。对 [B,T,D] 张量，常见 LN 沿 D；BN 的具体轴必须结合张量布局说明。",
+          "BN 训练使用 batch 统计，典型推理使用运行均值/方差；小 batch、样本非独立或线上分布变化时需格外留意。LN 训练与推理都用当前样本统计。",
+          "推荐稀疏特征、变长序列和流量分布变化不意味着禁用 BN，应做按场景分桶的验证；LLM 常采用 LN/RMSNorm，Pre-LN 与 Post-LN 又是残差路径设计问题。"
+        ]
+      },
+      {
+        "title": "验证方法",
+        "content": "固定模型与 batch size，比较收敛、线上线下偏差、长短序列和冷启动群体。检查 train()/eval() 切换、padding 是否污染统计，以及归一化是否抹去了有用的绝对幅值。"
+      }
+    ],
+    "pitfalls": [
+      "LN 不是“对一个 batch 的所有特征一起归一化”。",
+      "RMSNorm 通常不减均值，不应直接写成 LN。"
+    ],
+    "followUps": [
+      "BN 在 batch size=1 时一定不可用吗？",
+      "为什么 Pre-LN 更容易训练深网络？",
+      "embedding 是否需要归一化？"
+    ],
+    "references": [
+      {
+        "title": "Layer Normalization 原论文",
+        "url": "https://arxiv.org/abs/1607.06450"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q006": {
+    "summary": "先定位异常最早出现的位置，再处理原因。梯度消失/爆炸来自链式求导中的雅可比连乘，但 NaN 也可能源于输入、非法算子、数值精度或损失实现，不能一概归因于网络太深。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "记录逐层激活、梯度范数、参数更新/参数范数、loss scale，找首个非有限值；检查异常 batch、标签范围、mask 和除零。用小批次 FP32 复现，区分数值溢出与真实优化不稳定。",
+          "梯度消失检查饱和激活、过长路径、初始化、误用 detach 和 requires_grad。可改残差、归一化、合适初始化与门控结构。",
+          "梯度爆炸可用全局范数裁剪、降低学习率、warmup；AMP 下先 unscale 再裁剪。修复后看长期曲线和可复现实验，而不是只看一步 loss。"
+        ]
+      },
+      {
+        "title": "数学直觉",
+        "content": "若反向路径反复乘以谱范数偏大或偏小的雅可比，梯度可能指数放大或衰减。全局范数裁剪：g ← g·min(1,c/||g||₂)，主要限制步幅，不修复错误标签或非法算子。"
+      }
+    ],
+    "pitfalls": [
+      "裁剪不能挽救已经 NaN 的梯度。",
+      "梯度很小不一定消失，可能已收敛或损失平均方式改变。"
+    ],
+    "followUps": [
+      "如何检测断图而非数值消失？",
+      "梯度累积下应何时裁剪？",
+      "只在混合精度下爆炸如何查？"
+    ],
+    "references": [
+      {
+        "title": "RNN 梯度困难与范数裁剪原论文",
+        "url": "https://arxiv.org/abs/1211.5063"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q007": {
+    "summary": "负样本决定模型学会区分什么。随机负例给覆盖，批内负例给效率，难负例给辨别力；实际通常混合使用，并处理采样偏差、假负例和训练—服务分布不一致。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "双塔用 s(u,i)=uᵀv 或归一化余弦打分。批内把其他样本的正例当当前用户负例，能复用矩阵乘法，但它们按交互流分布采样，不是全库均匀分布。",
+          "曝光未点击负例更贴近旧策略，却包含位置偏差；ANN 挖掘的 hard negative 更难，也更可能是用户实际喜欢但未互动的物品。应屏蔽已知正例、同 item 重复和明显等价内容。",
+          "用均匀/流行度采样、批内和难负例混合，定期更新难负例；依据训练目标和实际采样概率决定是否作 logQ 校正。"
+        ]
+      },
+      {
+        "title": "公式与实验",
+        "content": "对采样 softmax 的一种校正是用 s(u,i)−log q(i) 作 logit；q 必须对应真实采样机制，混合采样、去重和重复次数不能随意忽略。验证全库或固定候选集 Recall@K、热门/长尾分桶表现及 ANN 实际召回，不只看批内准确率。"
+      }
+    ],
+    "pitfalls": [
+      "未交互不等于不喜欢。",
+      "负例越难越多不一定越好，可能强化假负例。"
+    ],
+    "followUps": [
+      "跨 GPU all-gather 的梯度与重复 item 如何处理？",
+      "logQ 校正应在推理继续使用吗？",
+      "怎么区分难负例与假负例？"
+    ],
+    "references": [
+      {
+        "title": "双塔采样偏差校正原论文",
+        "url": "https://research.google/pubs/sampling-bias-corrected-neural-modeling-for-large-corpus-item-recommendations/"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q008": {
+    "summary": "冷启动要分新用户、新物品和新场景，并明确“缺哪类信息”。内容特征与可控探索负责启动，真实反馈积累后再平滑切换到行为个性化。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "新用户用明确提供的兴趣、会话行为、上下文和高质量热门兜底，不把敏感属性推断当捷径；新物品用文本、图像、类目和作者等内容表征进入召回。",
+          "用适当的探索流量解决没有曝光就没有反馈的闭环，配合质量门槛、频控和风险护栏。可用 bandit 思路权衡收益与信息，但必须记录曝光概率，防止后续评估偏差。",
+          "区分完全冷、少量行为和成熟阶段，逐渐增加协同信号权重；关注首日体验和新品生存，而不只是总体 CTR。"
+        ]
+      },
+      {
+        "title": "实验设计",
+        "content": "按注册时间/物品上线时间切分，杜绝把未来交互泄漏进特征。报告冷用户留存、冷物品有效曝光覆盖、达到稳定估计的时间与总体护栏；比较同曝光预算下的策略。探索是有限资源，不应无条件平均分给低质量内容。"
+      }
+    ],
+    "pitfalls": [
+      "把全部用户平均指标当作冷启动效果会被老用户淹没。",
+      "内容相似性不等于用户偏好，仍需真实反馈校准。"
+    ],
+    "followUps": [
+      "探索预算如何分配和退出？",
+      "新品曝光少与质量差如何区分？",
+      "冷用户如何在一两个行为后更新兴趣？"
+    ],
+    "references": [
+      {
+        "title": "YouTube 两阶段推荐原论文",
+        "url": "https://research.google/pubs/deep-neural-networks-for-youtube-recommendations/"
+      },
+      {
+        "title": "双塔采样偏差校正原论文",
+        "url": "https://research.google/pubs/sampling-bias-corrected-neural-modeling-for-large-corpus-item-recommendations/"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q009": {
+    "summary": "多样性至少有列表内部、跨用户和平台目录三个层面，要与相关性、覆盖率、新颖性分开定义。指标必须对应业务希望增加的差异，而不是任意 embedding 距离。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "列表内多样性可用两两不相似度均值 ILD=2/[K(K−1)]·Σ_{i<j}d(i,j)，也可看类目熵；K<2 时需另约定。目录覆盖率是窗口内被推荐的不同物品数/可推荐物品数。",
+          "长尾曝光或 −log popularity 更接近新颖性；惊喜度还要求“非预期但相关”。不同用户收到不同列表属于个性化差异，不能用单列表熵替代。",
+          "可在重排中加入相似度惩罚、类目约束或 MMR，扫描相关性—多样性曲线，并用线上满意度、留存与负反馈做验证。"
+        ]
+      },
+      {
+        "title": "落地注意",
+        "content": "固定列表长度、时间窗口、可用目录和相似度定义。距离应检验是否符合用户感知；类目过粗或 embedding 模型变化会让分数不可比。长尾覆盖提高也可能只增加无效曝光，需要同时报告消费覆盖与质量。"
+      }
+    ],
+    "pitfalls": [
+      "随机打散能提高多样性，却可能伤害体验。",
+      "多样性、覆盖、新颖性不是同一指标。"
+    ],
+    "followUps": [
+      "同一作者不同主题算不算多样？",
+      "多样性如何因人而异？",
+      "重排约束与精排目标冲突怎么处理？"
+    ],
+    "references": [
+      {
+        "title": "MMR 原论文（作者 CMU 页面）",
+        "url": "https://www.cs.cmu.edu/afs/cs/Web/People/jgc/publication/MMR_DiversityBased_Reranking_SIGIR_1998.pdf"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q010": {
+    "summary": "先确定指标口径与实验可信度，再判断点击增长是有效消费增长，还是标题吸引、内容结构变化或体验退化。单看 CTR 或平均停留都不足以决定上线。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "先检查 SRM、分流单位、埋点、异常流量和实验周期；澄清停留是每次点击、每会话还是每用户，是否含未点击用户。",
+          "再做漏斗分解：曝光→点击→有效消费→互动/留存。点击增加可能带来更多短点击，使每点击平均时长下降，但人均总时长仍上升；短内容占比增加也会改变均值。",
+          "按新老用户、内容时长、入口、设备、网络分桶，排查加载变慢、误触和标题党。分桶用于定位，不以事后挑显著结果替代总体因果结论。"
+        ]
+      },
+      {
+        "title": "决策与统计",
+        "content": "在实验前定义主指标和护栏；对比总时长/用户、有效播放率、短退率、留存、负反馈及延迟。采用与随机化单位一致的置信区间，处理重复检验；对点击用户条件化是处理后选择，不能直接解释为同一群人的因果变化。"
+      }
+    ],
+    "pitfalls": [
+      "“CTR 涨就是成功”与“停留降就必须回滚”都缺乏业务口径。",
+      "显著性不等于业务重要性，也不能忽略护栏损失。"
+    ],
+    "followUps": [
+      "总时长与平均时长反向时如何解释？",
+      "发现只有一个分桶上涨，能否只上线该群体？",
+      "实验短期新奇效应怎么识别？"
+    ],
+    "references": [
+      {
+        "title": "Microsoft 可信实验：运行阶段",
+        "url": "https://www.microsoft.com/en-us/research/articles/patterns-of-trustworthy-experimentation-during-experiment-stage/"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q011": {
+    "summary": "点击是相关性、曝光与被查看概率共同作用的结果。位置偏差是展示位置影响查看/点击，曝光偏差是历史策略决定哪些内容有机会被观察；未曝光不能简单当作负样本。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "在简化位置模型中 P(C=1|u,i,k)=P(E=1|k)·P(R=1|u,i)，但这依赖查看与相关性的条件假设，真实页面可能还有信任和上下文效应。",
+          "用小流量随机换位或探索日志估计 propensity，检查同质内容在不同位置的点击差异。仅观察顶部点击高不能区分位置效应与顶部本来更相关。",
+          "IPS 用逆倾向权重校正，SNIPS 或截断可降低方差，也可能引入偏差。需要支持集重叠与正确倾向估计，不能从永不曝光的样本恢复可靠反事实。"
+        ]
+      },
+      {
+        "title": "诊断与评估",
+        "content": "记录策略版本、候选集、位置与曝光概率；比较随机桶和常规流量，做权重分布、有效样本量及敏感性分析。将“把位置加进模型吸收偏差”与“目标无偏估计”分开讨论。"
+      }
+    ],
+    "pitfalls": [
+      "直接删除位置特征，不会消除数据中的位置偏差。",
+      "极小 propensity 会导致高方差，权重裁剪不是无代价的。"
+    ],
+    "followUps": [
+      "没有随机流量怎么估计 propensity？",
+      "IPS 与 doubly robust 有何取舍？",
+      "如何处理旧策略从未展示的物品？"
+    ],
+    "references": [
+      {
+        "title": "Unbiased Learning-to-Rank 原论文",
+        "url": "https://arxiv.org/abs/1608.04468"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q012": {
+    "summary": "CTR 特征交互是在建模“某个特征的作用随另一个特征变化”。线性模型依赖人工交叉，FM 用低秩内积表示二阶交互，DNN 隐式组合，DCN 用显式交叉层；选型应兼顾稀疏泛化与服务成本。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "例如用户兴趣×商品类目比两者单独的线性贡献更能表达匹配。FM 的二阶项为 Σ_{i<j}〈v_i,v_j〉x_i x_j，通过共享 embedding 泛化到稀疏组合。",
+          "DeepFM 共享输入 embedding，联合 FM 低阶与 DNN 隐式高阶表示；DCN 的交叉层可写作 x_{l+1}=x_0(w_lᵀx_l)+b_l+x_l，这是原始向量参数版本。",
+          "不要预设越高阶越好；高阶组合可能稀疏、噪声大。先查特征时效和泄漏，再做等容量消融，关注 AUC、logloss、校准及线上收益。"
+        ]
+      },
+      {
+        "title": "工程边界",
+        "content": "embedding 表可能是主要存储成本；需要 OOV、低频特征正则、哈希碰撞与更新策略。FM 的二阶求和可用平方和恒等式避免枚举所有特征对。DCN-v2 的矩阵交叉与原始 DCN 不应混写。"
+      }
+    ],
+    "pitfalls": [
+      "DeepFM 不意味着完全不需要特征清洗与业务定义。",
+      "AUC 提升不保证概率校准或竞价收益提升。"
+    ],
+    "followUps": [
+      "FM 与矩阵分解是什么关系？",
+      "如何证明某组交互有贡献？",
+      "特征穿越通常出现在哪些统计特征？"
+    ],
+    "references": [
+      {
+        "title": "DeepFM 原论文",
+        "url": "https://arxiv.org/abs/1703.04247"
+      },
+      {
+        "title": "DCN 原论文",
+        "url": "https://arxiv.org/abs/1708.05123"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q013": {
+    "summary": "逻辑回归假设标签服从 Bernoulli，最大似然直接得到二元交叉熵；它也让 sigmoid 后的 logit 梯度简化为 p−y。不是因为分类任务绝对不能用均方误差。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "设 z=wᵀx+b，p=σ(z)。单样本似然为 p^y(1−p)^(1−y)，取负对数得 L=−y log p−(1−y)log(1−p)。",
+          "求导有 ∂L/∂z=p−y；对线性 logits，Hessian 是 XᵀWX，W 的对角为 p(1−p)，所以损失对参数凸。但深度网络接 BCE 并不因此成为凸优化。",
+          "若用 sigmoid 后 MSE，梯度额外乘 p(1−p)，错误且饱和时可能更新缓慢；BCE 的数值实现应使用 logits 版本以避免 log(0)。"
+        ]
+      },
+      {
+        "title": "实际注意",
+        "content": "线性可分数据上，无正则最大似然参数可能发散，通常需要正则化。负采样或类别加权会改变拟合的概率目标，要根据采样策略校准；训练 BCE 不等于自动获得线上校准。"
+      }
+    ],
+    "pitfalls": [
+      "交叉熵对概率凸，不代表任意神经网络对参数凸。",
+      "不要先 sigmoid 再交给 BCEWithLogitsLoss。"
+    ],
+    "followUps": [
+      "为什么可分数据权重会趋于无穷？",
+      "负采样后如何修正概率？",
+      "AUC 与交叉熵为何可能反向？"
+    ],
+    "references": [
+      {
+        "title": "Google：逻辑回归损失与正则化",
+        "url": "https://developers.google.com/machine-learning/crash-course/logistic-regression/loss-regularization"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q014": {
+    "summary": "三者都可利用同一问题的多条回答构造组内相对优势，但改动层次不同：GRPO 去掉独立 critic；DAPO 改裁剪、采样和损失聚合等训练细节；GSPO 把重要性比率与裁剪单位改为序列。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "GRPO 的结果奖励版本常取 A_i=(R_i−组均值)/(组标准差+ε)，以 token 概率比率做 PPO 式裁剪，原始目标还含参考策略 KL。",
+          "DAPO 保留 token ratio，采用上下界解耦且提高上界的裁剪，过滤组内奖励无差异的样本并补采，按全批有效 token 聚合损失，处理超长回答奖励噪声；论文训练配置移除了 KL 项。",
+          "GSPO 用 s_i=exp[(1/T_i)Σ_t log(πθ/πold)]，按序列裁剪，再乘组优势。长度归一化比率不是原始轨迹概率比率，不应宣称它是任意离策略目标的无偏估计器。"
+        ]
+      },
+      {
+        "title": "如何选与如何验证",
+        "content": "固定基础模型、提示分布、奖励器、生成 token 预算和评测预算，比较正确率/计算成本、熵、KL、裁剪率、回答长度、零优势组比例及训练失败率。GSPO 论文的 MoE 稳定性结果不等于所有架构必胜；DAPO 动态采样会改变有效训练题目分布，也增加 rollout 成本。"
+      }
+    ],
+    "pitfalls": [
+      "GRPO 本来就使用 token ratio；DAPO 的 token-level loss 重点是聚合权重。",
+      "不要把训练稳定、数学分数和通用对齐效果混为同一结论。"
+    ],
+    "followUps": [
+      "全组都答对或都答错为什么没有组内学习信号？",
+      "长度平均与 token 平均如何改变长回答权重？",
+      "序列比率为何需要更小的裁剪范围？"
+    ],
+    "references": [
+      {
+        "title": "DeepSeekMath / GRPO 原论文",
+        "url": "https://arxiv.org/html/2402.03300v3"
+      },
+      {
+        "title": "DAPO 原论文",
+        "url": "https://arxiv.org/html/2503.14476v2"
+      },
+      {
+        "title": "GSPO 原论文",
+        "url": "https://arxiv.org/html/2507.18071v2"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q015": {
+    "summary": "DPO 样本是同一上下文下的偏好对 (x,y_w,y_l)，质量来自“比较标准明确且差异可信”，而不是把一个好答案和一个随机坏答案拼起来。采样需覆盖部署分布，也保留足够有信息量的难例。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "从目标场景收集 prompt，对同一 prompt 生成多候选，使用正确性、遵循要求、安全性等清晰 rubric 标注胜负；无法可靠区分的 pair 可舍弃或采用支持软偏好的方法。",
+          "候选可来自当前模型、不同 checkpoint 或教师，但混合来源要记录并评估分布偏移。先去重、去测试集污染，按 prompt/用户或任务族划分数据，避免同题变体跨训练测试。",
+          "对长度、模板、模型来源和标注者偏好做审计；不能让 chosen 总是更长、带固定前缀，或 rejected 总是格式错误。先小规模人工复核，再扩大自动标注。"
+        ]
+      },
+      {
+        "title": "公式与评估",
+        "content": "标准目标 L=−log σ(β[log πθ(y_w|x)−log πref(y_w|x)−log πθ(y_l|x)+log πref(y_l|x)])，序列 logprob 通常是回答 token 的和，prompt 不计入响应损失。评估盲测胜率、长度控制后的胜率、任务正确率及安全/能力回退；仅看训练 margin 增大不够。"
+      }
+    ],
+    "pitfalls": [
+      "不需要显式训练奖励模型，不等于不需要可靠偏好信号。",
+      "改变为 token 均值会改变标准 DPO 目标，应说明变体。"
+    ],
+    "followUps": [
+      "怎样处理标注者分歧或平局？",
+      "偏好对过易与过难分别有什么问题？",
+      "离线 DPO 如何应对分布漂移？"
+    ],
+    "references": [
+      {
+        "title": "DPO 原论文",
+        "url": "https://arxiv.org/abs/2305.18290"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q016": {
+    "summary": "手写时先说明形状与 mask 语义：输入 [B,T,D]，Q/K/V 拆成 [B,H,T,D/H]，最后拼头并输出投影。下面是可读的自注意力教学实现，覆盖因果与 padding；生产环境优先用经过验证的融合算子。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "先做一次线性映射得到 Q/K/V，再 reshape 和 transpose 拆头。计算 QKᵀ/√d_h，屏蔽不能访问的 key，沿 key 维做 softmax。",
+          "权重乘 V 得到每个头输出，transpose 后 contiguous/reshape 拼回 D，再做输出投影。因果 mask 禁止看到未来；padding mask 屏蔽无效 token。",
+          "全 mask 行直接 softmax(−∞) 会 NaN，需要显式处理；padding query 的最终输出也清零。测试形状、梯度、因果隔离与全 padding，之后再对齐官方实现。"
+        ]
+      },
+      {
+        "title": "复杂度与限制",
+        "content": "参数与投影约 O(TD²)，注意力计算约 O(T²D)，显式注意力矩阵占 O(BHT²) 内存。本示例不含 KV cache、RoPE、cross-attention 或 GQA。代码已通过语法检查；当前本地环境没有 PyTorch，未声称完成运行数值测试。"
+      }
+    ],
+    "pitfalls": [
+      "softmax 维度必须是 key 轴。",
+      "布尔 mask 的 True 含义在不同 PyTorch API 中可能相反，必须查文档。",
+      "转置后直接 view 可能因内存不连续失败。"
+    ],
+    "followUps": [
+      "增量解码时 causal mask 的位置偏移怎么处理？",
+      "如何验证未来 token 改动不影响过去输出？",
+      "MHA 改为 GQA 需要改哪些张量形状？"
+    ],
+    "references": [
+      {
+        "title": "Attention Is All You Need",
+        "url": "https://arxiv.org/abs/1706.03762"
+      },
+      {
+        "title": "PyTorch scaled_dot_product_attention 文档",
+        "url": "https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "language": "python",
+    "code": "import math\nimport torch\nfrom torch import nn\n\nclass MultiHeadSelfAttention(nn.Module):\n    def __init__(self, dim, heads, dropout=0.0):\n        super().__init__()\n        if heads <= 0 or dim <= 0 or dim % heads:\n            raise ValueError(\"dim must be positive and divisible by heads\")\n        self.heads, self.head_dim = heads, dim // heads\n        self.qkv = nn.Linear(dim, 3 * dim)\n        self.out = nn.Linear(dim, dim)\n        self.drop = nn.Dropout(dropout)\n\n    def forward(self, x, valid=None, causal=False):\n        # x: [B,T,D]; valid: [B,T], True means real token.\n        b, t, d = x.shape\n        if t == 0:\n            raise ValueError(\"empty sequences are not supported\")\n        if valid is None:\n            valid = torch.ones(b, t, dtype=torch.bool, device=x.device)\n        if valid.shape != (b, t) or valid.dtype != torch.bool:\n            raise ValueError(\"valid must be bool [B,T]\")\n        valid = valid.to(x.device)\n        qkv = self.qkv(x).reshape(b, t, 3, self.heads, self.head_dim)\n        q, k, v = qkv.permute(2, 0, 3, 1, 4).unbind(0)\n        # FP32 attention scores for this educational implementation.\n        scores = (q.float() @ k.float().transpose(-2, -1))\n        scores = scores / math.sqrt(self.head_dim)\n        allowed = valid[:, None, :, None] & valid[:, None, None, :]\n        if causal:\n            allowed = allowed & torch.ones(t, t, dtype=torch.bool,\n                                            device=x.device).tril()\n        scores = scores.masked_fill(~allowed, float(\"-inf\"))\n        has_key = allowed.any(dim=-1, keepdim=True)\n        # A fully masked row must not enter softmax as all -inf.\n        scores = scores.masked_fill(~has_key, 0.0)\n        weights = scores.softmax(dim=-1).masked_fill(~allowed, 0.0)\n        y = self.drop(weights).to(v.dtype) @ v\n        y = y.transpose(1, 2).contiguous().reshape(b, t, d)\n        y = self.out(y)\n        return y.masked_fill(~valid[..., None], 0.0)\n\n# Suggested local checks (requires PyTorch):\nif __name__ == \"__main__\":\n    torch.manual_seed(7)\n    m = MultiHeadSelfAttention(16, 4).eval()\n    x = torch.randn(2, 5, 16, requires_grad=True)\n    valid = torch.tensor([[1, 1, 1, 0, 0], [0, 0, 0, 0, 0]],\n                         dtype=torch.bool)\n    y = m(x, valid, causal=True)\n    assert y.shape == x.shape and torch.isfinite(y).all()\n    assert (y[~valid] == 0).all()\n    y.square().sum().backward()\n    assert torch.isfinite(x.grad).all()\n    a = torch.randn(1, 5, 16)\n    z = a.clone()\n    z[:, 3:] += 100\n    assert torch.allclose(m(a, causal=True)[:, :3],\n                          m(z, causal=True)[:, :3], atol=1e-6)\n",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q017": {
+    "summary": "SFT 学示范答案，DPO 学成对偏好，GRPO 从当前或近当前策略采样并利用组内奖励差异更新。选择首先由可获得的监督信号决定，不是固定要求三者必须串联。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "SFT 最小化示范响应的负对数似然，通常对 assistant token 计算损失。它适合教格式、知识表达和任务流程，但会模仿示范中的错误。",
+          "DPO 利用 chosen/rejected 相对参考策略的 logprob 差训练偏好，不需要在线 rollout 或单独训练 reward model 的标准离线流程；效果受数据覆盖和标注一致性限制。",
+          "GRPO 对同题多次采样，用组内相对奖励形成优势并作受约束的策略更新。适合有可靠验证器的任务，但 rollout 成本、奖励投机和零方差组需要监控。"
+        ]
+      },
+      {
+        "title": "按资源做选择",
+        "content": "示范可靠、奖励难定义时先做好 SFT；能比较却难打绝对分时考虑偏好学习；可验证数学/代码任务可评估 RL。用同一测试集评估任务成功、遵循指令、鲁棒性、遗忘和单位训练成本，不能仅比较各自 loss 数值。"
+      }
+    ],
+    "pitfalls": [
+      "SFT 不等于只能训练一次，DPO 也不天然保证事实正确。",
+      "GRPO 无 critic 不等于没有奖励模型/验证器，也不等于无需参考模型的所有配置。"
+    ],
+    "followUps": [
+      "为何偏好训练会同时降低 chosen 的绝对概率？",
+      "SFT 数据质量差能否靠 RL 自动补救？",
+      "三阶段顺序如何做消融？"
+    ],
+    "references": [
+      {
+        "title": "DPO 原论文",
+        "url": "https://arxiv.org/abs/2305.18290"
+      },
+      {
+        "title": "DeepSeekMath / GRPO 原论文",
+        "url": "https://arxiv.org/html/2402.03300v3"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q018": {
+    "summary": "RoPE 旋转 Q/K，让点积显式依赖相对位置；多模态扩展的重点是把一维序列位置改成有意义的时空坐标，而不是给图像再加一个模态标签。Qwen2-VL 的 M-RoPE 是一个具体实现，不代表所有 VLM。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "对每对通道按位置 m 与频率 θ 旋转，q′_m=R(m)q_m、k′_n=R(n)k_n，因此内积为 q_mᵀR(n−m)k_n。常见实现旋转 Q/K，而不直接旋转 V。",
+          "图像 patch 展平为一维会弱化二维几何表达，可给不同通道组分别使用高度和宽度坐标。Qwen2-VL 进一步分配时间、高度、宽度三组位置；文本三轴位置相同，图像时间坐标固定，视频增加时间坐标。",
+          "必须让 patch 网格、合并后的 token 数、position ids 和 KV cache 一致。输入更高分辨率或更长视频时，既要看空间/时间泛化，也要看 token 成本。"
+        ]
+      },
+      {
+        "title": "验证与限制",
+        "content": "设计空间关系、OCR、顺序交换和跨帧定位测试，并对不同分辨率/帧率分桶。相对位置性质不保证无限长度外推，频率分配和未见过的坐标范围仍会影响效果；不能用 RoPE 替代视觉编码器。"
+      }
+    ],
+    "pitfalls": [
+      "M-RoPE 不是把 t、h、w 简单相加成单个坐标。",
+      "不同代 Qwen-VL 的时间坐标与频率策略可能不同，应说明具体版本。"
+    ],
+    "followUps": [
+      "展平位置与二维坐标有什么歧义？",
+      "动态分辨率下 position ids 怎样生成？",
+      "视频帧率变化时如何表达真实时间？"
+    ],
+    "references": [
+      {
+        "title": "RoFormer 原论文",
+        "url": "https://arxiv.org/abs/2104.09864"
+      },
+      {
+        "title": "Qwen2-VL 原论文 §2.1",
+        "url": "https://arxiv.org/html/2409.12191v2"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q019": {
+    "summary": "常见 VLM 把图像经视觉编码器变成 patch 特征，再经连接器映射到语言模型可接收的表示；文本则正常分词。两类表示在语言模型中交互，生成文本答案，但连接方式与训练阶段有多种设计。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "以 LLaVA 类架构为例：图像缩放/切块→视觉编码器→线性或 MLP projector→视觉 token，与文本 embedding 按模板拼接；语言模型预测回答 token。",
+          "BLIP-2 用 Q-Former 提取压缩的视觉信息再连接冻结 LLM；另一类架构用 cross-attention 访问视觉特征。不能把所有 VLM 都描述成“拼 token”。",
+          "训练通常先学习模态对齐，再做视觉指令调优；哪些模块冻结、是否端到端更新取决于方法和资源。训练标签要正确遮罩图像占位与 prompt，避免把它们当普通目标 token。"
+        ]
+      },
+      {
+        "title": "评估与工程",
+        "content": "先检查预处理、图像 token 数、模板、位置编码、attention mask；用图文打乱/遮图消融判断模型是否真正依赖视觉。分开评估 OCR、细粒度定位、图表、空间关系和幻觉，高分辨率与多图会显著增加 KV cache 与推理成本。"
+      }
+    ],
+    "pitfalls": [
+      "投影到同一维度不等于自动完成语义对齐。",
+      "视觉 encoder 全局特征可能丢细节，更多 token 也不自动更准确。"
+    ],
+    "followUps": [
+      "为什么需要 connector 而不是直接拼像素？",
+      "如何判断答案来自语言先验而非图像？",
+      "多图与视频输入怎样控制 token 预算？"
+    ],
+    "references": [
+      {
+        "title": "LLaVA / Visual Instruction Tuning 原论文",
+        "url": "https://arxiv.org/abs/2304.08485"
+      },
+      {
+        "title": "BLIP-2 原论文",
+        "url": "https://arxiv.org/abs/2301.12597"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  },
+  "q020": {
+    "summary": "其他模型生成的数据可以有用，但直接替换 GRPO 的 rollout 策略而沿用原公式会造成分布错配。必须区分教师数据蒸馏、近策略异步采样和真正离策略优化，三者不是同一件事。",
+    "sections": [
+      {
+        "title": "60–120 秒口述",
+        "content": [
+          "标准 GRPO 用行为策略 π_old 采样，分母应对应实际采样策略的 token 概率。若答案来自 q，却用不相关 π_old 作分母，比率失去对应关系。",
+          "即使用 πθ/q，单步 token 比率也不自动校正其他策略产生的前缀分布；完整轨迹比率是各 token 比率乘积，长序列方差可能非常大。组内基线与题目难度分布也会随采样策略变化。",
+          "工程上优先采用同模型近版本 rollout，记录策略版本、token logprob、温度/top-p 等解码配置并限制滞后。差异很大的教师答案更适合先作 SFT、偏好或专门蒸馏，若坚持离策略 RL，需用有明确假设的校正方法。"
+        ]
+      },
+      {
+        "title": "验收信号",
+        "content": "比较目标/行为 logprob 差、比率分布、裁剪比例、有效样本量和真实验证集奖励。若 tokenizer 不同，token 级概率对应关系也不能直接套用；截断采样可能破坏支持集覆盖。只有教师更强，不能证明其 rollout 对当前策略的 GRPO 梯度更好。"
+      }
+    ],
+    "pitfalls": [
+      "参考策略 π_ref 用于约束，行为策略用于采样，不能混淆。",
+      "重要性采样要求行为策略对目标相关事件有覆盖；缺概率或支持不足时不能靠公式补救。"
+    ],
+    "followUps": [
+      "异步 rollout 最多允许多少版本滞后？",
+      "top-p 采样时应记录哪一种 logprob？",
+      "教师数据何时更适合 SFT 而非 RL？"
+    ],
+    "references": [
+      {
+        "title": "DeepSeekMath / GRPO 原论文",
+        "url": "https://arxiv.org/html/2402.03300v3"
+      },
+      {
+        "title": "GSPO 对重要性比率的讨论",
+        "url": "https://arxiv.org/html/2507.18071v2"
+      }
+    ],
+    "reviewStatus": "AI 起草 · 已核对主要来源 · 未经人工专业审核",
+    "sourceCheckedAt": "2026-10-25",
+    "editorialNote": "以下为独立整理的面试参考框架；工程建议并非原论文逐字结论，也不代表面试官标准答案。"
+  }
+}
