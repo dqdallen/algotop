@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import * as core from '../core.js';
 import {readFileSync} from 'node:fs';
-const q={title:'LoRA',tracks:['LLM'],records:[{source:'s1',company:'甲',jobDirections:[{id:'computer-vision',certainty:'explicit',evidence:'视觉算法岗'}]},{source:'s2',company:'乙',jobDirections:[{id:'llm',certainty:'explicit',evidence:'大模型岗'}]}]};
+const q={title:'LoRA',tracks:['LLM'],records:[{source:'s1',company:'甲',companyEvidence:{certainty:'explicit',text:'explicit company'},jobDirections:[{id:'computer-vision',certainty:'explicit',evidence:'视觉算法岗'}]},{source:'s2',company:'乙',companyEvidence:{certainty:'explicit',text:'explicit company'},jobDirections:[{id:'llm',certainty:'explicit',evidence:'大模型岗'}]}]};
 const sources=[{id:'s1',dateEvidence:{value:'2024',precision:'year',basis:'published',evidence:'2024年'}},{id:'s2',date:'2021-01-01'},{id:'s3',date:null}];
 test('job direction filters provenance independently of study tags',()=>{assert.equal(core.matchingRecords(q,{jobDirection:'llm',company:'甲'}).length,0);assert.equal(core.matchingRecords(q,{jobDirection:'computer-vision',track:'LLM'}).length,1)});
 test('date scope excludes archived and unknown sources by default when requested',()=>{assert.deepEqual(core.matchingRecords(q,{scope:'active',sources}).map(r=>r.source),['s1']);assert.deepEqual(core.matchingRecords(q,{scope:'archive',sources}).map(r=>r.source),['s2']);assert.equal(core.matchingRecords({...q,records:[{source:'s3'}]},{scope:'unknown',sources}).length,1)});
