@@ -1,0 +1,9 @@
+{
+  "www.nowcoder.com": {
+    "terms_status": "unreviewed",
+    "terms_url": null,
+    "reviewed_at": null,
+    "allowed_paths": ["/discuss/"],
+    "note": "Default closed: review current terms before changing to permitted. Browser/search access does not establish crawler permission."
+  }
+}
