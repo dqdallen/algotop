@@ -57,9 +57,8 @@ must be credential-free HTTPS public-looking domains and reviewed policy hosts.
 Limits: serial; at most 100 sources, 100 HTTP requests, 512 KB per response,
 15-second per-request timeout, 600-second configured start-request budget,
 1,000 candidates per source, and at least 2 seconds between requests. Defaults
-are substantially smaller. An in-flight response can finish after the start budget; socket timeouts and
-the response-size cap still apply. This is not a hard wall-clock kill switch.
-No new request starts after budget expiry.
+are substantially smaller. An in-flight request may finish after the start
+budget (at most its request timeout); no new request starts after budget expiry.
 Feed descriptions/body text are used only in transient parser memory and are not
 written. This parser deliberately does not extract or approve question text.
 
@@ -94,7 +93,7 @@ optional `canonical_question_id`, `interview_date_claim`, and `provenance_claim`
 Then run:
 
 ```sh
-python tools/collection/review.py review-proposals-input.json \
+python tools/collection/review.py tools/collection/review-example-input.json \
   --baseline data.json --output .collection/review-proposals.json
 ```
 
@@ -104,9 +103,10 @@ repository), and flags a source/question pair already present in the baseline.
 Every result remains `pending_human_approval`, `countEligible=false`, zero added
 occurrences. It **cannot** approve, merge into runtime, or publish. Proposal input
 is reviewer work, not trustworthy proof merely because fields are present.
-The input is a reviewer-authored JSON array. Historical private review examples
-and full prior evidence ledgers are intentionally not included in this source
-package; the registry retains bounded access-status/provenance notes.
+The example uses historical `platform-access.json` notes (not newly extracted
+live questions): two proposed mappings to existing LoRA/RoPE cards and one rejected
+personal-project question. Mapping to an existing card is distinct from proving
+the same source occurrence was already included.
 
 HTML registry seeds now use explicit title relevance terms; unrelated navigation
 is excluded, while the relevant seed page itself is retained. This is only a

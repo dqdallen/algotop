@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "scope": "manual-grounding-and-engine-replay-only",
+  "documents_checked": 6,
+  "cases_checked": 27,
+  "decisions": {
+    "exclude": 9,
+    "retain": 18
+  },
+  "source_type_counts": {
+    "github_interview_compilation": 2,
+    "github_question_compilation": 1,
+    "github_explanatory_notes": 1,
+    "previously_preserved_manual_excerpt": 2
+  },
+  "review_candidates": 17,
+  "merged_same_repository_evidence": 1,
+  "baseline_mapped_cases": 9,
+  "semantic_findings": [],
+  "corrected_findings": [
+    "ghv3-003",
+    "ghv3-066"
+  ],
+  "errors": [],
+  "approved_questions": 0,
+  "published": false,
+  "model_calls": 0,
+  "extraction_precision": null,
+  "extraction_recall": null
+}

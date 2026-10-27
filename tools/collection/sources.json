@@ -376,12 +376,15 @@
       "enabled": true,
       "permission_status": "permitted_feed_only",
       "prior_access_evidence": {
-        "file": "endpoint-livechecks-v4.json",
-        "note": "See independent live endpoint check; feed accessibility is not permission."
+        "note": "Historical external live-check artifact is not bundled. Bundled summary documents the publisher endpoint observation, not a reproducible redirect proof or new permission grant.",
+        "external_historical_file": "endpoint-livechecks-v4.json",
+        "bundled": false,
+        "summary_file": "endpoint-permission-evidence.json",
+        "summary_entry_id": "cnblogs_autodriver_atom"
       },
       "permission_evidence": "Official CNblogs team RSS invitation + published author feed; policy expires after 30 days.",
       "publisher_advertised_url": "https://www.cnblogs.com/autodriver/rss",
-      "canonical_endpoint_evidence": "Publisher endpoint redirects to this host/path. CNblogs explicitly upgraded to HTTPS; no HTTP redirect followed. See .collection/redirect-evidence.json.",
+      "canonical_endpoint_evidence": "Historical redirect observation from external .collection/redirect-evidence.json (not bundled; not independently reproducible from this package). Publisher-advertised URL is retained above; see prior_access_evidence.summary_file for bounded historical endpoint summaries. No new endpoint permission or current redirect verification is asserted.",
       "candidate_keywords": [
         "面经",
         "面试",
@@ -396,12 +399,15 @@
       "enabled": true,
       "permission_status": "permitted_feed_only",
       "prior_access_evidence": {
-        "file": "endpoint-livechecks-v4.json",
-        "note": "See independent live endpoint check; feed accessibility is not permission."
+        "note": "Historical external live-check artifact is not bundled. Bundled summary documents the publisher endpoint observation, not a reproducible redirect proof or new permission grant.",
+        "external_historical_file": "endpoint-livechecks-v4.json",
+        "bundled": false,
+        "summary_file": "endpoint-permission-evidence.json",
+        "summary_entry_id": "cnblogs_tuaran_atom"
       },
       "permission_evidence": "Official CNblogs team RSS invitation + published author feed; policy expires after 30 days.",
       "publisher_advertised_url": "https://www.cnblogs.com/tuaran/rss",
-      "canonical_endpoint_evidence": "Publisher endpoint redirects to this host/path. CNblogs explicitly upgraded to HTTPS; no HTTP redirect followed. See .collection/redirect-evidence.json.",
+      "canonical_endpoint_evidence": "Historical redirect observation from external .collection/redirect-evidence.json (not bundled; not independently reproducible from this package). Publisher-advertised URL is retained above; see prior_access_evidence.summary_file for bounded historical endpoint summaries. No new endpoint permission or current redirect verification is asserted.",
       "candidate_keywords": [
         "面经",
         "面试",
@@ -416,11 +422,14 @@
       "enabled": true,
       "permission_status": "permitted_feed_only",
       "prior_access_evidence": {
-        "file": "endpoint-livechecks-v4.json",
-        "note": "See independent live endpoint check; feed accessibility is not permission."
+        "note": "Historical external live-check artifact is not bundled. Bundled summary documents the publisher endpoint observation, not a reproducible redirect proof or new permission grant.",
+        "external_historical_file": "endpoint-livechecks-v4.json",
+        "bundled": false,
+        "summary_file": "endpoint-permission-evidence.json",
+        "summary_entry_id": "csdn_goai_rss"
       },
       "publisher_advertised_url": "https://blog.csdn.net/qq_36816848/rss/list",
-      "canonical_endpoint_evidence": "Publisher endpoint redirects to this host/path. CNblogs explicitly upgraded to HTTPS; no HTTP redirect followed. See .collection/redirect-evidence.json.",
+      "canonical_endpoint_evidence": "Historical redirect observation from external .collection/redirect-evidence.json (not bundled; not independently reproducible from this package). Publisher-advertised URL is retained above; see prior_access_evidence.summary_file for bounded historical endpoint summaries. No new endpoint permission or current redirect verification is asserted.",
       "candidate_keywords": [
         "面经",
         "面试",

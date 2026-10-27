@@ -1,1 +1,1 @@
-{"type":"module","scripts":{"test":"node --test"}}
+{"name":"algowen","private":true,"type":"module","scripts":{"test":"node --test","build":"node scripts/build.js","validate:data":"node scripts/data-pipeline.js"}}

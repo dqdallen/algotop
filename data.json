@@ -17930,7 +17930,7 @@
     {
       "id": "ghv3-003",
       "canonicalQuestionId": "ghv3-003",
-      "title": "投机解码为什么能够加速生成？",
+      "title": "介绍大模型投机采样。",
       "tracks": [
         "LLM"
       ],
@@ -17962,7 +17962,7 @@
               "evidence": "来源文件未明确该问题的招聘岗位；不从LLM技术主题推断"
             }
           ],
-          "wording": "投机解码为什么能够加速生成？",
+          "wording": "介绍大模型投机采样。",
           "wordingKind": "paraphrase",
           "evidenceLevel": "public_compilation",
           "countEligible": true,
@@ -22389,7 +22389,7 @@
     {
       "id": "ghv3-066",
       "canonicalQuestionId": "ghv3-066",
-      "title": "集体通信与点对点通信有何定位差异？",
+      "title": "什么是集体通信？",
       "tracks": [
         "LLM"
       ],
@@ -22421,7 +22421,7 @@
               "evidence": "来源文件未明确该问题的招聘岗位；不从LLM技术主题推断"
             }
           ],
-          "wording": "集体通信与点对点通信有何定位差异？",
+          "wording": "什么是集体通信？",
           "wordingKind": "paraphrase",
           "evidenceLevel": "public_compilation",
           "countEligible": true,

@@ -1,0 +1,394 @@
+{
+  "schema_version": 1,
+  "review_method": "Agent manual inspection of preserved snapshots; no independent human adjudication and no live model extraction.",
+  "offset_unit": "Python Unicode code points; end exclusive",
+  "documents": [
+    {
+      "id": "tencent",
+      "path": "raw/jingtian11/EasyOffer/LLM大厂面经合集/腾讯/【0310】腾讯IEG一面.md",
+      "sha256": "d1cedbabaae3b3743b417c9d24940cf566bf58b8b2653c7fae191410d8465c5e",
+      "source_url": "https://github.com/jingtian11/EasyOffer/blob/9aed2cb583a141dce76f24d0e5be82b355dc8843/LLM大厂面经合集/腾讯/【0310】腾讯IEG一面.md",
+      "source_type": "github_interview_compilation",
+      "expected_company": "腾讯",
+      "expected_job_directions": [
+        "unknown"
+      ],
+      "expected_interview_date": null
+    },
+    {
+      "id": "bytedance",
+      "path": "raw/jingtian11/EasyOffer/LLM大厂面经合集/字节/【0301】字节二面.md",
+      "sha256": "bd010b7ba57ffcd1a6e40ca13aeb4eed4bb646d7ad5c16bb63f16b48b28fcd51",
+      "source_url": "https://github.com/jingtian11/EasyOffer/blob/9aed2cb583a141dce76f24d0e5be82b355dc8843/LLM大厂面经合集/字节/【0301】字节二面.md",
+      "source_type": "github_interview_compilation",
+      "expected_company": "字节跳动",
+      "expected_job_directions": [
+        "unknown"
+      ],
+      "expected_interview_date": null
+    },
+    {
+      "id": "distributed",
+      "path": "raw/wdndev/llm_interview_note/04.分布式训练/分布式训练题目/分布式训练题目.md",
+      "sha256": "9ecd26462a49fa4eceff6ff4f0a06c79ece7a370e80f1fc50086c5205dacb9c6",
+      "source_url": "https://github.com/wdndev/llm_interview_note/blob/581d54dd9a72e1d0a4eb28ae50859db83901b783/04.分布式训练/分布式训练题目/分布式训练题目.md",
+      "source_type": "github_question_compilation",
+      "expected_company": "其他",
+      "expected_job_directions": [
+        "unknown"
+      ],
+      "expected_interview_date": null
+    },
+    {
+      "id": "lora",
+      "path": "raw/wdndev/llm_interview_note/05.有监督微调/4.lora/4.lora.md",
+      "sha256": "79609482228d9beb26913af43a46cc24d2a30e37c0343277af8a1c583b39d785",
+      "source_url": "https://github.com/wdndev/llm_interview_note/blob/581d54dd9a72e1d0a4eb28ae50859db83901b783/05.有监督微调/4.lora/4.lora.md",
+      "source_type": "github_explanatory_notes",
+      "expected_company": "其他",
+      "expected_job_directions": [
+        "unknown"
+      ],
+      "expected_interview_date": null
+    },
+    {
+      "id": "dewu",
+      "path": "manual-v5/dewu-excerpts.txt",
+      "sha256": "fdbda4ddf9b66d2321261ada7cf4359123f046dae88cfa4c5b0e7b59c1c19caf",
+      "source_url": "https://maimai.cn/article/detail?efid=9doXZsjxTubIY101QN3Z4w&fid=1883689082",
+      "source_type": "previously_preserved_manual_excerpt",
+      "expected_company": "其他",
+      "expected_job_directions": [
+        "unknown"
+      ],
+      "expected_interview_date": null
+    },
+    {
+      "id": "leapmotor",
+      "path": "manual-v5/leapmotor-excerpts.txt",
+      "sha256": "e9572b6569b7d36669e9a56a4363e962c253a259e34c204f6510361825c0c669",
+      "source_url": "https://maimai.cn/article/detail?efid=hGc0_clcEZGhCB99ksX_TA&fid=1905537008",
+      "source_type": "previously_preserved_manual_excerpt",
+      "expected_company": "其他",
+      "expected_job_directions": [
+        "unknown"
+      ],
+      "expected_interview_date": null
+    }
+  ],
+  "cases": [
+    {
+      "id": "gold-01",
+      "document": "tencent",
+      "start": 56,
+      "end": 66,
+      "fragment_sha256": "cac69e19c0ad3c112466c4f405c916dd660b81d07e848de262e635f9b328658f",
+      "decision": "exclude",
+      "concept": "candidate_resume",
+      "baseline_mapping": null,
+      "reason": "candidate-specific resume"
+    },
+    {
+      "id": "gold-02",
+      "document": "tencent",
+      "start": 86,
+      "end": 110,
+      "fragment_sha256": "8b35fef9951ed618c3e6bc9a97b0d77cc7ec564f598749473c3f67991ca35549",
+      "decision": "exclude",
+      "concept": "candidate_dataset",
+      "baseline_mapping": null,
+      "reason": "candidate-specific dataset selection; no free-standing general question"
+    },
+    {
+      "id": "gold-03",
+      "document": "tencent",
+      "start": 114,
+      "end": 141,
+      "fragment_sha256": "b71f1abaec27d2265cd7cbc589749f674cf02a1da59e1e94f5745367298c8fa6",
+      "decision": "retain",
+      "concept": "rope_context_extension",
+      "baseline_mapping": "ghv3-001",
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-04",
+      "document": "tencent",
+      "start": 145,
+      "end": 156,
+      "fragment_sha256": "465d82e939eecfc434b7a0e87f430822280075be36022d56cd6796f6746f9029",
+      "decision": "retain",
+      "concept": "model_forgetting",
+      "baseline_mapping": "ghv3-002",
+      "reason": "split general clause from project follow-ups"
+    },
+    {
+      "id": "gold-05",
+      "document": "tencent",
+      "start": 167,
+      "end": 185,
+      "fragment_sha256": "bd2d1344a6b80f1ea45a73897472000f6d242df3347c0283ed2eab0a5d097b18",
+      "decision": "exclude",
+      "concept": "candidate_experiments",
+      "baseline_mapping": null,
+      "reason": "personal experiments; do not invent general question"
+    },
+    {
+      "id": "gold-06",
+      "document": "tencent",
+      "start": 189,
+      "end": 198,
+      "fragment_sha256": "06e5d027fea8e21a73275538c85ce1ce79ca7a354e9225399da8360aa77fa2f1",
+      "decision": "retain",
+      "concept": "speculative_sampling_overview",
+      "baseline_mapping": "ghv3-003",
+      "reason": "overview only; acceleration why-question is not stated"
+    },
+    {
+      "id": "gold-07",
+      "document": "tencent",
+      "start": 199,
+      "end": 207,
+      "fragment_sha256": "ad4f53e0b1c5ab02e22371d9408475f8fa017fc1fd595b111f36f6e440017d60",
+      "decision": "exclude",
+      "concept": "candidate_model_choice",
+      "baseline_mapping": null,
+      "reason": "project-specific model selection"
+    },
+    {
+      "id": "gold-08",
+      "document": "tencent",
+      "start": 225,
+      "end": 231,
+      "fragment_sha256": "05b548ef8d48eedc8aab79d4934d6444d720ecdba525b3136cb4a96338a17656",
+      "decision": "retain",
+      "concept": "grpo_overview",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-09",
+      "document": "tencent",
+      "start": 235,
+      "end": 245,
+      "fragment_sha256": "0c54ac6aae52b276b482462430c156a51135dc2bf1691111f8c7a2ad55b311a7",
+      "decision": "retain",
+      "concept": "merge_sorted_lists",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-10",
+      "document": "bytedance",
+      "start": 34,
+      "end": 38,
+      "fragment_sha256": "eac36b80fcb2bc45d1cbc6ce5b836d06e382bc94124eb81c6493971323d18aca",
+      "decision": "exclude",
+      "concept": "self_introduction",
+      "baseline_mapping": null,
+      "reason": "not transferable knowledge"
+    },
+    {
+      "id": "gold-11",
+      "document": "bytedance",
+      "start": 42,
+      "end": 52,
+      "fragment_sha256": "da5404ffd0bfa684bd631901526b47019271f0f07be008d8665a521d12e86fae",
+      "decision": "exclude",
+      "concept": "internship_history",
+      "baseline_mapping": null,
+      "reason": "candidate-specific history"
+    },
+    {
+      "id": "gold-12",
+      "document": "bytedance",
+      "start": 78,
+      "end": 91,
+      "fragment_sha256": "a3f4863e1198ab12c07b0488e03671f29c768a2662d4c97ee24352d6b14d4ed5",
+      "decision": "retain",
+      "concept": "mla_rope",
+      "baseline_mapping": "q067",
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-13",
+      "document": "bytedance",
+      "start": 92,
+      "end": 117,
+      "fragment_sha256": "c58a4930d8eaa25c42bd6bffe0c43bf59f9ac91ca310a9cebf5827f8820381f0",
+      "decision": "retain",
+      "concept": "rope_context_extension",
+      "baseline_mapping": "ghv3-001",
+      "reason": "same conceptual question and same repository as Tencent; do not add occurrence"
+    },
+    {
+      "id": "gold-14",
+      "document": "bytedance",
+      "start": 145,
+      "end": 163,
+      "fragment_sha256": "9f45393c1672217f9036aa60dbefc1ac87c0c13f951606e5d6322432f529e43f",
+      "decision": "exclude",
+      "concept": "internship_reflection",
+      "baseline_mapping": null,
+      "reason": "candidate-specific history"
+    },
+    {
+      "id": "gold-15",
+      "document": "distributed",
+      "start": 568,
+      "end": 578,
+      "fragment_sha256": "d3f38a0896aa7f4e751e20cbe41224dbafce889c9a0a151b453a2341ab6cf2f8",
+      "decision": "retain",
+      "concept": "p2p_definition",
+      "baseline_mapping": "ghv3-065",
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-16",
+      "document": "distributed",
+      "start": 827,
+      "end": 836,
+      "fragment_sha256": "13760f7a6faa9d6d19def74024f5fccc9d318f1f721616938797ac63b075a73a",
+      "decision": "retain",
+      "concept": "collective_definition",
+      "baseline_mapping": "ghv3-066",
+      "reason": "definition only, not inferred comparison"
+    },
+    {
+      "id": "gold-17",
+      "document": "distributed",
+      "start": 2256,
+      "end": 2278,
+      "fragment_sha256": "b5033987347c85b25b914e3b0027c98737156dffd41c923bd85aa6b51f81da40",
+      "decision": "retain",
+      "concept": "parallelism_comparison",
+      "baseline_mapping": "ghv3-067",
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-18",
+      "document": "lora",
+      "start": 10,
+      "end": 20,
+      "fragment_sha256": "b4cb2925c1a6c99888328ecb3876533e33eddf226ef819045a05f661d6f1ac57",
+      "decision": "exclude",
+      "concept": "lora_heading",
+      "baseline_mapping": null,
+      "reason": "topic heading, not an explicitly asked question; no inferred question"
+    },
+    {
+      "id": "gold-19",
+      "document": "lora",
+      "start": 1249,
+      "end": 1278,
+      "fragment_sha256": "66ed8a25e7d9528fbb093de6fbac1ea056f23052e2e2f5abb76397ddffcca9fd",
+      "decision": "exclude",
+      "concept": "rank_answer",
+      "baseline_mapping": null,
+      "reason": "answer statement, not question"
+    },
+    {
+      "id": "gold-20",
+      "document": "dewu",
+      "start": 0,
+      "end": 18,
+      "fragment_sha256": "4d67ab5644ae03efa9cd83ba23de5a2a3d406dd6a6bc9c8063d9686e48566cb9",
+      "decision": "retain",
+      "concept": "mllm_mechanism_comparison",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-21",
+      "document": "dewu",
+      "start": 19,
+      "end": 33,
+      "fragment_sha256": "5e7579d8c985cc909d84af8aafa1674c6238845381e1824bd3e7dbc886a272d5",
+      "decision": "retain",
+      "concept": "stack_definition_usage",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-22",
+      "document": "dewu",
+      "start": 34,
+      "end": 42,
+      "fragment_sha256": "f47059666abb6edf792071970acd911dbb1a1a4d34e7f8c7dfdb11bed603bdae",
+      "decision": "retain",
+      "concept": "program_memory_regions",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-23",
+      "document": "leapmotor",
+      "start": 0,
+      "end": 13,
+      "fragment_sha256": "5205e7ac7244dcdefcf4e66a41cf370b9e2aa39ac55031a39e84098154196f7c",
+      "decision": "retain",
+      "concept": "transformer_principle",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-24",
+      "document": "leapmotor",
+      "start": 14,
+      "end": 23,
+      "fragment_sha256": "0eaa0ca99dcb78bfef4ded9dd7a4360105d71b48e2bfc9870d6a12ffe0b64870",
+      "decision": "retain",
+      "concept": "attention_scaling",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-25",
+      "document": "leapmotor",
+      "start": 24,
+      "end": 31,
+      "fragment_sha256": "46abf05f3fab7d46042a0fc42bae39cfb08f266c92e8c6d561e1d8a87e911ae2",
+      "decision": "retain",
+      "concept": "bn_ln_comparison",
+      "baseline_mapping": "q005",
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-26",
+      "document": "leapmotor",
+      "start": 32,
+      "end": 37,
+      "fragment_sha256": "7b0bdd5d82d7ee76130458bd570adb67590fb0c678fe85e6f89f1757809e3c68",
+      "decision": "retain",
+      "concept": "path_sum_ii",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    },
+    {
+      "id": "gold-27",
+      "document": "leapmotor",
+      "start": 38,
+      "end": 44,
+      "fragment_sha256": "afeeb59bce9f5b53941b388d92f9d35208f142728a973652af0cf655a4058eec",
+      "decision": "retain",
+      "concept": "robot_path_count",
+      "baseline_mapping": null,
+      "reason": "explicit transferable question"
+    }
+  ],
+  "semantic_findings": [
+    {
+      "question_id": "ghv3-003",
+      "case_id": "gold-06",
+      "observed_title": "投机解码为什么能够加速生成？",
+      "proposed_title": "介绍大模型投机采样。",
+      "reason": "Source asks overview only, not why acceleration works."
+    },
+    {
+      "question_id": "ghv3-066",
+      "case_id": "gold-16",
+      "observed_title": "集体通信与点对点通信有何定位差异？",
+      "proposed_title": "什么是集体通信？",
+      "reason": "Source asks definition only, not a comparison."
+    }
+  ]
+}

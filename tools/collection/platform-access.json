@@ -1,0 +1,294 @@
+{
+  "checked_at": "2026-10-26T14:16:00Z",
+  "method": "Bounded public web.search + web.open, 1–2 candidates per platform where discoverable; extra Nowcoder fallback checks. No credentials, circumvention, software installation, or external writes.",
+  "scope": "2022-present algorithm-interview original evidence; personal project fragments excluded, explicitly asked generic fundamentals retained.",
+  "overall_limits": [
+    "Search results may be cached; body_readable means web tool returned substantive page text, not a browser or bulk crawling authorization.",
+    "Original means first-person authorship claim, not independent verification of company/interview.",
+    "No valid original found in a bounded search does not prove platform has none.",
+    "Only summaries/paraphrased topics recorded, no full copyrighted articles."
+  ],
+  "entries": [
+    {
+      "platform": "Nowcoder",
+      "url": "https://www.nowcoder.com/discuss/640246271718002688?sourceSSR=subject",
+      "access": "body_readable",
+      "title": "B站 算法实习生（推荐算法）面经",
+      "date": "2024-07-10 (edited)",
+      "author": "lzjoy",
+      "provenance": "first_person_original_claim",
+      "eligible": true,
+      "company": "哔哩哔哩",
+      "role": "推荐算法实习生",
+      "evidence": "Body identifies two interview rounds, personal timeline and offer; lines 66-73 and 91-97 contain actual questions.",
+      "common_questions": [
+        "BERT训练损失及推导",
+        "交叉熵与最大似然的关系",
+        "梯度消失/爆炸的成因与缓解",
+        "pooling的作用及常见方法比较",
+        "Maxpooling反向传播",
+        "AUC计算",
+        "实现三层神经网络"
+      ],
+      "excluded_fragments": [
+        "个人项目实现细节",
+        "为何在该候选人的BERT项目中添加pooling层"
+      ],
+      "split_example": "同一项目追问的Maxpooling反向传播保留；个人方案选择理由剔除。一般知识按同一次面试记录一次，不按追问数量加频次。"
+    },
+    {
+      "platform": "Nowcoder",
+      "url": "https://www.nowcoder.com/feed/main/detail/cbfb9a618ad64fdab37d4d2b38c569e2",
+      "access": "tool_inaccessible",
+      "evidence": "web.open: URL is not accessible via this tool. No claim of login requirement.",
+      "eligible": false,
+      "provenance": "unverified"
+    },
+    {
+      "platform": "Nowcoder",
+      "url": "https://www.nowcoder.com/feed/main/detail/d45f4419161740558f36138f459847e1",
+      "access": "tool_inaccessible",
+      "evidence": "web.open: URL is not accessible via this tool. No claim of login requirement.",
+      "eligible": false,
+      "provenance": "unverified"
+    },
+    {
+      "platform": "Nowcoder",
+      "url": "https://www.nowcoder.com/feed/main/detail/66bec8f58ce348b7bd2094c2d2e864f2",
+      "access": "shell_only",
+      "title": "美团搜推算法工程师校招面经（24届）",
+      "evidence": "Search snippet shows title; open returns only four site navigation links, no interview body.",
+      "eligible": false,
+      "provenance": "unverified_possible_repost"
+    },
+    {
+      "platform": "personal_blog",
+      "url": "https://zhangzhao219.github.io/2025/01/10/Interview/Interview-Campus-Recruitment-2024-Autumn-Summary/",
+      "access": "body_readable",
+      "title": "2025校园招聘（2024秋季）算法岗总结",
+      "author": "Zhang Zhao",
+      "date": "2025-01-10",
+      "interview_period": "2024 autumn recruitment",
+      "provenance": "first_person_original_claim",
+      "eligible": true,
+      "company": "multiple_explicit_sections",
+      "role": "算法岗; specific applications stated per section",
+      "evidence": "First-person recruitment timeline; explicit company section headings and round-specific questions.",
+      "records": [
+        {
+          "company": "京东",
+          "role": "算法岗（文章总体范围，未见精确岗位名）",
+          "common_questions": [
+            "LoRA等微调方法",
+            "RoPE",
+            "DeepSpeed优化",
+            "FlashAttention",
+            "tokenizer机制"
+          ]
+        },
+        {
+          "company": "拼多多",
+          "role": "算法工程师",
+          "common_questions": [
+            "Transformer参数量计算",
+            "DPO基本假设"
+          ]
+        },
+        {
+          "company": "小红书",
+          "role": "RedStar（算法岗总体范围）",
+          "common_questions": [
+            "BERT与GPT结构",
+            "大模型改进",
+            "不同激活函数的任务差异"
+          ]
+        }
+      ],
+      "excluded_fragments": [
+        "论文和实习具体内容",
+        "未公开的已谈薪企业面经，不为其推断任何问题"
+      ]
+    },
+    {
+      "platform": "CSDN",
+      "url": "https://blog.csdn.net/qq_36816848/article/details/138006969",
+      "access": "partial_body_paywall",
+      "title": "面经总结系列（九）： Boss 直聘算法工程师",
+      "date": "2024-07-18 modified; actual interview year not verified",
+      "author": "GoAI",
+      "provenance": "platform_original_label_first_person_text_but_series_compilation_context",
+      "eligible": false,
+      "company": "BOSS直聘",
+      "role": "算法工程师",
+      "evidence": "Visible first-person account and first-round questions, then code cut midstream and explicit paid unlock notice at lines 96-98. Actual interview dates 9.28/11.06/11.08 lack year.",
+      "common_questions": [
+        "LSTM结构与激活函数",
+        "RCNN慢的原因",
+        "AUC计算"
+      ],
+      "limits": "Can use visible questions only after interview date/provenance clarification; not complete text."
+    },
+    {
+      "platform": "CSDN",
+      "url": "https://blog.csdn.net/qq_45717425/article/details/160315245",
+      "access": "search_snippet_only_open_failed",
+      "title": "2026最新字节大模型岗面经汇总(多平台整理)",
+      "date": "2026-05-07 shown in search",
+      "provenance": "explicit_multiplatform_compilation",
+      "eligible": false,
+      "evidence": "Search text explicitly says gathered from xhs/Zhihu/CSDN/Nowcoder/Maimai. Open returns UnexpectedStatusCode; original badge is not evidence of a first-person interview.",
+      "common_questions": [
+        "attention缩放原因",
+        "MHA复杂度",
+        "Pre-norm与Post-norm"
+      ],
+      "limits": "Discovery lead only; never count its aggregate questions as one new interview."
+    },
+    {
+      "platform": "cnblogs",
+      "url": "https://www.cnblogs.com/autodriver/p/19735720",
+      "access": "body_readable",
+      "title": "2026年阿里算法岗位LeetCode高频题和备考建议",
+      "date": "2026-03-18",
+      "provenance": "compilation_from_LeetcodeTop",
+      "eligible": false,
+      "evidence": "Body explicitly attributes data to LeetcodeTop; includes aggregated frequencies not original personal interviews.",
+      "limits": "Discovery/background only; no new occurrence counts."
+    },
+    {
+      "platform": "cnblogs",
+      "url": "https://www.cnblogs.com/tuaran/p/20164742",
+      "access": "body_readable",
+      "title": "字节 AI Agent 二面（飞连）面试题与参考解答",
+      "date": "2026 (page discusses 2026; exact original interview date unknown)",
+      "provenance": "explicit_reworking_of_circulating_account",
+      "eligible": false,
+      "company": "字节跳动",
+      "role": "AI Agent应用开发岗",
+      "evidence": "Opening describes reworking a circulating interview account; no original account verified.",
+      "common_questions": [
+        "Transformer结构",
+        "RLHF与DPO"
+      ],
+      "limits": "Not algorithm-role evidence and not independently counted."
+    },
+    {
+      "platform": "GitHub",
+      "url": "https://github.com/yang19527/AwesomeInterview",
+      "access": "readme_readable",
+      "title": "AwesomeInterview",
+      "provenance": "link_index_compilation",
+      "eligible": false,
+      "evidence": "README links interview explanations on mp.weixin.qq.com and articles.zsxq.com; raw README also readable.",
+      "raw_url": "https://raw.githubusercontent.com/yang19527/AwesomeInterview/main/README.md",
+      "limits": "Follow original URLs, deduplicate; repository itself is not one interview or proof of event/date."
+    },
+    {
+      "platform": "Zhihu",
+      "url": "https://www.zhihu.com/tardis/zm/art/148246487",
+      "access": "body_readable",
+      "title": "深度学习算法工程师面经(微软、阿里、商汤等offer)之上篇",
+      "provenance": "first_person_thematic_compilation",
+      "eligible": false,
+      "evidence": "Body readable, but retrieved page provides no verified publication/interview date; thematic grouping prevents assigning each question to a company.",
+      "limits": "Exclude from 2022-present sample until date verified; no company-frequency inference."
+    },
+    {
+      "platform": "Zhihu",
+      "url": "https://zhuanlan.zhihu.com/p/1939002307070124480",
+      "access": "search_snippet_only_http403",
+      "title": "2025最新整理：AI大模型开发学习资料包",
+      "date": "2025-08-26 (search)",
+      "provenance": "promotional_compilation",
+      "eligible": false,
+      "evidence": "Direct open returns 403 Forbidden. Search shows resource promotion, not first-person interview.",
+      "limits": "No paywall/login bypass."
+    },
+    {
+      "platform": "Xiaohongshu",
+      "url": "https://www.xiaohongshu.com/search_result?keyword=%E7%AE%97%E6%B3%95%E9%9D%A2%E7%BB%8F",
+      "access": "discovery_endpoint_tool_inaccessible",
+      "eligible": false,
+      "provenance": "no_original_found",
+      "evidence": "Two domain-limited searches did not surface relevant explore pages; direct search endpoint tool-inaccessible.",
+      "limits": "This is a search endpoint, NOT a verified original post. No platform-wide claim of impossibility or login requirement. Need user-provided public links/export for further bounded testing."
+    },
+    {
+      "platform": "Maimai",
+      "url": "https://maimai.cn/article/detail?efid=NokLi7qVdFyzuL3tdYmkkA&fid=1374930357",
+      "access": "body_readable",
+      "title": "字节跳动招聘算法岗，他们最看重哪些新技术能力？",
+      "date": "2019-12-04",
+      "provenance": "repost_or_general_advice",
+      "eligible": false,
+      "evidence": "Body dated 19-12-04, contains another byline and general preparation advice, outside time scope."
+    },
+    {
+      "platform": "Maimai",
+      "url": "https://maimai.cn/article/detail?efid=hGc0_clcEZGhCB99ksX_TA&fid=1905537008",
+      "access": "body_readable",
+      "title": "拿到零跑offer靠的这份面经",
+      "date": "03-05 displayed; year unverified",
+      "author": "Y学长求职加油站",
+      "provenance": "coaching_feedback_compilation",
+      "eligible": false,
+      "company": "零跑汽车",
+      "role": "算法/预测岗 (among multiple roles)",
+      "common_questions": [
+        "Transformer机制及缩放因子",
+        "BN与LN区别"
+      ],
+      "evidence": "Article body visible to END, login notice only after body for more content/comments. Author explicitly talks about coaching feedback across roles; not one first-person interview.",
+      "limits": "Do not confuse generic login button with blocked body; no occurrence counting without original record."
+    },
+    {
+      "platform": "Bilibili",
+      "url": "https://www.bilibili.com/video/BV1BE4NzfExh/",
+      "access": "search_metadata_only_http412",
+      "title": "秋招大模型Agent算法面经复盘",
+      "date": "2025-10-11",
+      "provenance": "possible_personal_recap_unverified",
+      "eligible": false,
+      "evidence": "Search returned title/date/description and playlist labels; direct open HTTP 412 Precondition Failed. No video, transcript, or frame-level questions verified.",
+      "limits": "Playlist related-video topics are not questions verified in this video."
+    },
+    {
+      "platform": "Bilibili",
+      "url": "https://www.bilibili.com/video/BV1K8KVepE4u/",
+      "access": "search_metadata_only_http412",
+      "title": "2024秋招AI大模型算法面经八股文汇总",
+      "date": "2025-02-12",
+      "provenance": "compilation_promotional",
+      "eligible": false,
+      "evidence": "Search returned title/date/description and playlist labels; direct open HTTP 412 Precondition Failed. No video, transcript, or frame-level questions verified.",
+      "limits": "Playlist related-video topics are not questions verified in this video."
+    },
+    {
+      "platform": "WeChat_via_Sogou",
+      "url": "https://weixin.sogou.com/weixin?type=2&query=%E7%AE%97%E6%B3%95%20%E9%9D%A2%E7%BB%8F%202024",
+      "access": "search_endpoint_tool_inaccessible",
+      "eligible": false,
+      "provenance": "discovery_endpoint",
+      "evidence": "Search-engine site query yielded no relevant Sogou article; direct Sogou query not accessible via tool.",
+      "limits": "Sogou discovery unverified. GitHub offered alternative direct official WeChat URLs, tested below."
+    },
+    {
+      "platform": "WeChat",
+      "url": "https://mp.weixin.qq.com/s/-I0Yqvx7V8MAaNmffpwgNg",
+      "access": "tool_nonretryable_error",
+      "eligible": false,
+      "provenance": "unverified_link_from_GitHub_index",
+      "evidence": "web.open cannot be opened (non-retryable error). No body or date verified.",
+      "limits": "No login/paid/bot reason can be conclusively assigned from tool error alone."
+    },
+    {
+      "platform": "WeChat",
+      "url": "https://mp.weixin.qq.com/s/4psrnFwGDriWrqAuiRFzTQ",
+      "access": "tool_nonretryable_error",
+      "eligible": false,
+      "provenance": "unverified_link_from_GitHub_index",
+      "evidence": "web.open cannot be opened (non-retryable error). No body or date verified.",
+      "limits": "No login/paid/bot reason can be conclusively assigned from tool error alone."
+    }
+  ]
+}
