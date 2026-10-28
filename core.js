@@ -19,3 +19,13 @@ export function sourceYears(source){if(sourceScope(source)==='candidate')return 
 export function coverageSummary(db){const partitions={active:0,unknown:0,archive:0,candidate:0,future:0},matrix=Object.fromEntries(['2022','2023','2024','2025','2026','unknown','archive','candidate','future'].map(k=>[k,{}]));const seen=new Set();for(const s of db.sources||[]){const identity=canonicalSourceId(s);if(seen.has(identity))continue;seen.add(identity);const scope=sourceScope(s);partitions[scope]++;const columns=scope==='active'?sourceYears(s).filter(y=>y>='2022'&&y<='2026'):[scope];for(const col of columns)for(const id of new Set((s.jobDirections?.length?s.jobDirections:[{id:'unknown'}]).map(d=>d.id))){matrix[col]||={};matrix[col][id]=(matrix[col][id]||0)+1}}const questions=db.questions||[];return {partitions,matrix,totalSources:seen.size,questions:questions.length,answered:questions.filter(q=>resolveAnswer(q.answer,null)).length}}
 
 export function sourceDateLabel(s){const explicit=[s.interviewDate,s.interviewMonth,s.interviewYear==null?null:String(s.interviewYear)].find(validDateValue);if(explicit)return `面试日期依据 · ${explicit} · ${explicit.length===4?'仅确认年份':explicit.length===7?'仅确认年月':'精确到日'}`;if((s.qualification==='secondary_compilation'||canonicalSourceId(s).startsWith('github:'))&&!/^interview/.test(s.dateEvidence?.basis||'')&&!s.interviewDate&&!s.interviewMonth&&!s.interviewYear&&!s.interviewDateRange)return `汇总/仓库来源 · ${s.dateEvidence?.value||s.date||'来源日期未知'}（来源发布或更新信息，不代表本题面试日期；面试年份未确认）`;if(s.interviewDateRange)return `面试时间范围 ${s.interviewDateRange.start} 至 ${s.interviewDateRange.end}（${s.interviewDateRange.evidence||'来源记述'}）；不是单次面试日期`;const d=s.dateEvidence;return d?`${/^interview/.test(d.basis||'')?'面试日期依据':'来源日期依据'} · ${d.value||'日期未确认'} · ${d.precision==='year'?'仅确认年份':d.precision==='month'?'仅确认年月':d.precision==='day'?'精确到日':'精度未知'} · ${d.basis||'unknown'}（${d.evidence||'依据待确认'}）`:s.dateDisplay||s.date||'日期未确认'}
+
+// Slice only after filtering and sorting; practice queues still use the full selection.
+export function paginateQuestions(questions,page=1,pageSize=20){
+ pageSize=[20,50,100].includes(Number(pageSize))?Number(pageSize):20;
+ const total=questions.length,pageCount=Math.ceil(total/pageSize);
+ page=Math.min(Math.max(1,Number.isFinite(Number(page))?Math.trunc(Number(page)):1),Math.max(1,pageCount));
+ const offset=(page-1)*pageSize;
+ const pages=pageCount<=7?Array.from({length:pageCount},(_,i)=>i+1):[...new Set([1,...Array.from({length:5},(_,i)=>Math.max(2,Math.min(page-2,pageCount-5))+i),pageCount])];
+ return {items:questions.slice(offset,offset+pageSize),total,page,pageSize,pageCount,start:total?offset+1:0,end:Math.min(offset+pageSize,total),pages};
+}
