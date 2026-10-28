@@ -7,3 +7,6 @@ __pycache__/
 # Private v7 review working copies, journals and transaction backups
 .local-review/
 .review/
+
+_site/
+node_modules/
