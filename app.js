@@ -1,4 +1,4 @@
-import {sourceDateLabel as dateLabel,countSources,sourceYears,recordMetadata,filterQuestions,resolveQuestionId,migrateProgress,resolveAnswer,matchingRecords,evidenceStats,validateProgress,studyQueue,paginateQuestions} from './core.js?v=github-corner-20261028';
+import {sourceDateLabel as dateLabel,countSources,sourceYears,recordMetadata,filterQuestions,resolveQuestionId,migrateProgress,resolveAnswer,matchingRecords,evidenceStats,validateProgress,studyQueue,paginateQuestions} from './core.js?v=collection-20261030';
 const $=s=>document.querySelector(s), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeURL=url=>{try{const u=new URL(url);return ['https:','http:'].includes(u.protocol)?u.href:'#'}catch{return '#'}};
 let db,taxonomy={jobDirections:[]},track='',state={},session=null,revealed=false,noticeTimer,activeId='',lastFocus,page=1,pageSize=20;

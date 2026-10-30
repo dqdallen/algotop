@@ -4,7 +4,7 @@ import {resolve} from 'node:path';
 import {countSources} from '../core.js';
 const taxonomy=JSON.parse(readFileSync(new URL('../taxonomy.json',import.meta.url),'utf8'));
 const JOBS=new Set(taxonomy.jobDirections.map(d=>d.id));
-const CUTOFF='2026-10-25', TRACKS=new Set(['推荐','搜索','广告','NLP','LLM','VLM','营销','CV','语音','机器人','自动驾驶','风控','运筹优化','时序预测','图学习','机器学习','强化学习','统计基础','优化','多模态','数据挖掘']);
+const CUTOFF='2026-10-30', TRACKS=new Set(['推荐','搜索','广告','NLP','LLM','VLM','营销','CV','语音','机器人','自动驾驶','风控','运筹优化','时序预测','图学习','机器学习','强化学习','统计基础','优化','多模态','数据挖掘']);
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
 const text=v=>typeof v==='string'&&v.trim().length>0;
 function canonical(value){const u=new URL(value);if(!['http:','https:'].includes(u.protocol)||u.username||u.password)throw Error('HTTP(S) URL required');u.hash='';for(const k of [...u.searchParams.keys()])if(k.startsWith('utm_')||['spm','from'].includes(k))u.searchParams.delete(k);u.searchParams.sort();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.href;}
